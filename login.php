@@ -1,3 +1,95 @@
+<?php
+// Add this at the top of the file
+session_start();
+
+// Database connection
+$db_host = "localhost";
+$db_user = "root";
+$db_pass = "";
+$db_name = "registration";
+
+$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Handle Sign In
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['form_type']) && $_POST['form_type'] == 'signin') {
+    $email = $conn->real_escape_string($_POST['email']);
+    $password = $_POST['password'];
+    
+    $sql = "SELECT * FROM users WHERE email = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_role'] = $user['role'];
+            
+            switch($user['role']) {
+                case 'admin':
+                    header("Location: admin.php");
+                    break;
+                case 'owner':
+                    header("Location: owner.php");
+                    break;
+                case 'user':
+                default:
+                    header("Location: userdashboard.php");
+                    break;
+            }
+            exit();
+        } else {
+            $signinErrors['password'] = "Invalid password";
+        }
+    } else {
+        $signinErrors['email'] = "Email not found";
+    }
+    $stmt->close();
+}
+
+// Handle Sign Up
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['form_type']) && $_POST['form_type'] == 'signup') {
+    $name = $conn->real_escape_string($_POST['name']);
+    $email = $conn->real_escape_string($_POST['email']);
+    $phone = $conn->real_escape_string($_POST['phone']);
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    
+    // Check if email already exists
+    $check_sql = "SELECT id FROM users WHERE email = ?";
+    $check_stmt = $conn->prepare($check_sql);
+    $check_stmt->bind_param("s", $email);
+    $check_stmt->execute();
+    $check_result = $check_stmt->get_result();
+    
+    if ($check_result->num_rows > 0) {
+        $signupErrors['email'] = "Email already exists";
+    } else {
+        $sql = "INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssss", $name, $email, $phone, $password);
+        
+        if ($stmt->execute()) {
+            $successMessage = "Registration successful! Please sign in.";
+            header("Location: login.php?action=signin");
+            exit();
+        } else {
+            $signupErrors['general'] = "Registration failed. Please try again.";
+        }
+        $stmt->close();
+    }
+    $check_stmt->close();
+}
+
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -170,9 +262,7 @@
     }
 
     .overlay {
-      background: #4CAF50;
-      background: -webkit-linear-gradient(to right, #4CAF50, #2E7D32);
-      background: linear-gradient(to right, #4CAF50, #2E7D32);
+      background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
       background-repeat: no-repeat;
       background-size: cover;
       background-position: 0 0;
@@ -383,7 +473,7 @@
 
   <div class="container" id="container">
     <div class="form-container sign-up-container">
-      <form action="registration.php" method="post" id="signupForm">
+      <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" id="signupForm">
         <h1>Create Account</h1>
         <input type="hidden" name="form_type" value="signup">
         <div class="input-group">
@@ -422,7 +512,7 @@
       </form>
     </div>
     <div class="form-container sign-in-container">
-      <form action="user.php" method="post" id="signinForm">
+      <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" id="signinForm">
         <h1>Sign in</h1>
         <input type="hidden" name="form_type" value="signin">
         <div class="input-group">
@@ -441,7 +531,7 @@
             <span class="field-error"><?php echo $signinErrors['password']; ?></span>
         <?php endif; ?>
         
-        <a href="#">Forgot your password?</a>
+        <a href="forgot_password.php">Forgot your password?</a>
         <button type="submit">Sign In</button>
       </form>
     </div>
@@ -508,8 +598,8 @@
           message: 'Please enter a valid email address'
         },
         phone: {
-          pattern: /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/,
-          message: 'Phone number must be in format: XXX-XXX-XXXX'
+          pattern: /^[6-9]\d{9}$/,
+          message: 'Phone number must valid and be 10 digits long'
         },
         password: {
           pattern: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/,
@@ -564,13 +654,25 @@
           return false;
         }
 
-        // Phone number formatting
-        if (field === 'phone' && rules.pattern.test(value)) {
-          const formatted = value.replace(/\D/g, '')
-                               .match(/(\d{3})(\d{3})(\d{4})/)
-                               .slice(1)
-                               .join('-');
-          input.value = formatted;
+        // Phone number validation
+        if (field === 'phone') {
+          // Remove all non-digits
+          let digits = value.replace(/\D/g, '');
+          
+          // Check if number starts with valid digit and is 10 digits long
+          if (!(/^[6-9]\d{9}$/).test(digits)) {
+            input.classList.add('invalid');
+            const error = document.createElement('span');
+            error.className = 'field-error';
+            error.textContent = 'Phone number must start with 6, 7, 8, or 9 and be 10 digits long';
+            input.after(error);
+            return false;
+          }
+
+          // Set plain 10 digits
+          input.value = digits;
+          input.classList.add('valid');
+          return true;
         }
 
         input.classList.add('valid');

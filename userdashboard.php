@@ -1,11 +1,22 @@
+<?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// Get the user's name from the session
+$user_name = $_SESSION['user_name'];
+?>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>Turf Booking System</title>
+        <title>SOCCER-11 User Dashboard</title>
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
-        <meta content="Product Landing Page Template" name="keywords">
-        <meta content="Product Landing Page Template" name="description">
 
         <!-- Favicon -->
         <link href="img/favicon.ico" rel="icon">
@@ -13,298 +24,164 @@
         <!-- Google Fonts -->
         <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet"> 
 
-        <!-- CSS Libraries -->
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-        <link href="lib/slick/slick.css" rel="stylesheet">
-        <link href="lib/slick/slick-theme.css" rel="stylesheet">
 
-        <!-- Template Stylesheet -->
+        <!-- Custom Styles -->
         <link href="css/style.css" rel="stylesheet">
+        
         <style>
-            .welcome-card {
+            .admin-sidebar {
                 background: #f8f9fa;
-                border-radius: 10px;
+                min-height: 100vh;
                 padding: 20px;
-                text-align: center;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                margin-top: 20px;
+                border-right: 1px solid #dee2e6;
             }
-            .turf-menu {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                gap: 15px;
+            
+            .admin-content {
+                padding: 20px;
             }
-            .turf-card {
-                flex: 1 1 calc(30% - 10px);
+            
+            .stats-card {
                 background: #fff;
-                border-radius: 10px;
-                overflow: hidden;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                transition: transform 0.2s ease-in-out;
-            }
-            .turf-card:hover {
-                transform: translateY(-5px);
-            }
-            .turf-card img {
-                width: 100%;
-                height: 150px;
-                object-fit: cover;
-            }
-            .turf-card h5 {
-                padding: 10px;
-                margin: 0;
-                font-size: 1.2rem;
-                background: #f8f9fa;
-                text-align: center;
-            }
-            .btn-book {
-                margin-top: 20px;
-                background-color: #007bff;
-                color: #fff;
-            }
-            .highlight {
-                background: #007bff;
-                color: #fff;
-                padding: 10px;
-                border-radius: 5px;
-                text-align: center;
+                border-radius: 8px;
+                padding: 20px;
                 margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
-            .announcement {
-                background: #ffc107;
-                color: #000;
-                padding: 10px;
-                border-radius: 5px;
-                text-align: center;
-                margin-bottom: 20px;
+            
+            .admin-nav-link {
+                color: #333;
+                padding: 10px 15px;
+                display: block;
+                border-radius: 4px;
+                margin-bottom: 5px;
             }
-            body {
-                background-image: url('img/2bddaca37a232e039554eaba34919d3beecf3c37.jpg.webp');
-                background-size: cover;
-                background-attachment: fixed;
-                background-position: center;
-                background-repeat: no-repeat;
-                position: relative;
+            
+            .admin-nav-link:hover {
+                background: #e9ecef;
+                text-decoration: none;
             }
-            body::before {
-                content: '';
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(255, 255, 255, 0.9);
-                z-index: -1;
-            }
-            .welcome-card, .turf-card {
-                background: rgba(255, 255, 255, 0.95);
-            }
-            .logbtn {
-                background-color: #007bff;
-                color: white;
-                border: none;
-                border-radius: 25px;
-                padding: 8px 20px;
-                cursor: pointer;
-                transition: background-color 0.3s ease;
-            }
-            .logbtn:hover {
-                background-color: #0056b3;
+            
+            .admin-nav-link.active {
+                background: rgb(24, 137, 32);
+                color: #fff;
             }
         </style>
     </head>
 
-    <body data-spy="scroll" data-target=".navbar" data-offset="51">
+    <body>
         <!-- Nav Start -->
-        <div id="nav">
-            <div class="navbar navbar-expand-md bg-light navbar-light">
-                <a href="index.html" class="navbar-brand">SOCCER-11</a>
-                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+        <nav class="navbar navbar-expand-md bg-light navbar-light">
+            <a href="userdashboard.php" class="navbar-brand">SOCCER-11</a>
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item"><a href="#dashboard" class="nav-link">Dashboard</a></li>
-                        <li class="nav-item"><a href="#book" class="nav-link">Book Turf</a></li>
-                        <li class="nav-item"><a href="#cancel" class="nav-link">Cancel Booking</a></li>
-                        <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
-                        <a href="index.html"><button class="logbtn">Log Out</button></a>
-                    </ul>
-                </div>
+            <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user-circle mr-2"></i><?php echo htmlspecialchars($user_name); ?>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                            <a class="dropdown-item" href="profile.php"><i class="fas fa-user mr-2"></i>Profile</a>
+                            <a class="dropdown-item" href="settings.php"><i class="fas fa-cog mr-2"></i>Settings</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
+                        </div>
+                    </li>
+                </ul>
             </div>
-        </div>
+        </nav>
         <!-- Nav End -->
+        
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-2 admin-sidebar">
+                    <h4 class="mb-4">Dashboard</h4>
+                    <a href="userdashboard.php" class="admin-nav-link active"><i class="fas fa-home mr-2"></i>Overview</a>
+                    <a href="book_turf.php" class="admin-nav-link"><i class="fas fa-calendar-alt mr-2"></i>Book Turf</a>
+                    <a href="my_bookings.php" class="admin-nav-link"><i class="fas fa-list mr-2"></i>My Bookings</a>
+                    <a href="contact.php" class="admin-nav-link"><i class="fas fa-envelope mr-2"></i>Contact</a>
+                </div>
 
-        <!-- Welcome Section Start -->
-        <div id="dashboard" class="mt-5 pt-5">
-            <div class="container">
-                <div class="welcome-card mb-4" style="margin-top: 50px;">
-                    <h1>Welcome, <span id="customer-name">[Customer Name]</span>!</h1>
-                    <p>Your current bookings and activity will appear here. Manage your schedule effectively.</p>
-                    <button class="btn btn-book" onclick="document.getElementById('book').scrollIntoView({behavior: 'smooth'})">Book Now</button>
-                </div>
-                <div class="highlight mb-4">
-                    <h4>Today's Highlight</h4>
-                    <p>Get 10% off on bookings for Full Field!</p>
-                </div>
-                <div class="announcement mb-4">
-                    <h4>Special Announcement</h4>
-                    <p>New evening slots are now available. Book your preferred turf today!</p>
-                </div>
-            </div>
-        </div>
-        <!-- Welcome Section End -->
+                <!-- Main Content -->
+                <div class="col-md-10 admin-content">
+                    <h2 class="mb-4">Welcome, <?php echo htmlspecialchars($user_name); ?>!</h2>
+                    
+                    <div class="stats-card">
+                        <h4>Announcements</h4>
+                        <p>New evening slots are now available. Book your preferred turf today!</p>
+                    </div>
 
-        <!-- Book Turf Start -->
-        <div id="book" class="mt-5">
-            <div class="container">
-                <div class="section-header text-center">
-                    <h1>Book Your Turf</h1>
-                </div>
-                <div class="turf-menu">
-                    <div class="turf-card">
-                        <img src="img/pexels-rogerio-rodrigues-1643207864-27669822.jpg" alt="Full Field">
-                        <h5>Full Field</h5>
-                    </div>
-                    <div class="turf-card">
-                        <img src="img/pexels-gonzalo-acuna-166058093-10908537.jpg" alt="Half Field">
-                        <h5>Half Field</h5>
-                    </div>
-                    <div class="turf-card">
-                        <img src="img/pexels-jean-daniel-7970589.jpg" alt="Quarter Field">
-                        <h5>Quarter Field</h5>
-                    </div>
-                </div>
-                <form id="booking-form" class="mt-4" action="book_turf.php" method="POST">
-                    <div class="form-group col-md-6 mx-auto">
-                        <label for="date">Select Date</label>
-                        <input type="date" id="date" name="date" class="form-control" required>
-                    </div>
-                    <div class="form-group col-md-6 mx-auto">
-                        <label for="time-slot">Select Time Slot</label>
-                        <select id="time-slot" name="time_slot" class="form-control" onchange="checkAvailability(this.value)">
-                            <option value="6-7">6 AM - 7 AM</option>
-                            <option value="7-8">7 AM - 8 AM</option>
-                            <option value="8-9">8 AM - 9 AM</option>
-                            <option value="9-10">9 AM - 10 AM</option>
-                            <option value="10-11">10 AM - 11 AM</option>
-                            <option value="11-12">11 AM - 12 PM</option>
-                            <option value="12-1">12 PM - 1 PM</option>
-                            <option value="1-2">1 PM - 2 PM</option>
-                            <option value="2-3">2 PM - 3 PM</option>
-                            <option value="3-4">3 PM - 4 PM</option>
-                            <option value="4-5">4 PM - 5 PM</option>
-                            <option value="5-6">5 PM - 6 PM</option>
-                            <option value="6-7">6 PM - 7 PM</option>
-                            <option value="7-8">7 PM - 8 PM</option>
-                            <option value="8-9">8 PM - 9 PM</option>
-                            <option value="9-10">9 PM - 10 PM</option>
-                            <option value="10-11">10 PM - 11 PM</option>
-                            <option value="11-12">11 PM - 12 AM</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-md-6 mx-auto">
-                        <label for="payment">Payment Method</label>
-                        <select id="payment" name="payment" class="form-control">
-                            <option value="credit">Credit Card</option>
-                            <option value="debit">Debit Card</option>
-                            <option value="upi">UPI</option>
-                            <option value="netbanking">Net Banking</option>
-                        </select>
-                    </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary">Confirm Booking</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <!-- Book Turf End -->
-
-        <!-- Cancel Booking Start -->
-        <div id="cancel" class="mt-5">
-            <div class="container">
-                <div class="section-header">
-                    <h1>Cancel Booking</h1>
-                </div>
-                <form id="cancel-form" action="cancel_booking.php" method="POST">
-                    <div class="form-group">
-                        <label for="booking-id">Booking ID</label>
-                        <input type="text" id="booking-id" name="booking_id" class="form-control" required>
-                    </div>
-                    <button type="submit" class="btn btn-danger">Cancel Booking</button>
-                </form>
-            </div>
-        </div>
-        <!-- Cancel Booking End -->
-
-        <!-- Contact Start -->
-        <div id="contact" class="mt-5">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-md-6">
-                    </div>
-                    <div class="col-md-6">
-                        <div class="contact-info">
-                            <h2 style="font-size: 1.8rem; margin-bottom: 15px;">Get in Touch</h2>
-                            <p style="font-size: 1rem; margin-bottom: 12px;">
-                                SOCCER-11 Kanjirapally
-                            </p>
-                            <h3 style="font-size: 1.1rem; margin-bottom: 10px;"><i class="fa fa-envelope"></i> kickoff@gmail.com</h3>
-                            <h3 style="font-size: 1.1rem; margin-bottom: 10px;"><i class="fa fa-phone"></i> +91 9856754356</h3>
-                            <h3 style="font-size: 1.1rem; margin-bottom: 15px;"><i class="fa fa-phone"></i> +91 9678554321</h3>
-                            <a class="btn" href="login.php" style="font-size: 1rem; padding: 8px 20px;">Contact Us</a>
-                            <div class="social" style="margin-top: 20px;">
-                                <a href="#" style="font-size: 1.1rem; margin: 0 8px;"><i class="fab fa-twitter"></i></a>
-                                <a href="https://www.facebook.com/" style="font-size: 1.1rem; margin: 0 8px;"><i class="fab fa-facebook-f"></i></a>
-                                <a href="https://in.linkedin.com/" style="font-size: 1.1rem; margin: 0 8px;"><i class="fab fa-linkedin-in"></i></a>
-                                <a href="https://www.instagram.com/" style="font-size: 1.1rem; margin: 0 8px;"><i class="fab fa-instagram"></i></a>
-                                <a href="https://www.youtube.com/" style="font-size: 1.1rem; margin: 0 8px;"><i class="fab fa-youtube"></i></a>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="stats-card">
+                                <h4>Quick Stats</h4>
+                                <?php
+                                // Database connection
+                                $conn = new mysqli("localhost", "root", "", "registration");
+                                
+                                if ($conn->connect_error) {
+                                    echo "<p class='text-danger'>Unable to fetch statistics</p>";
+                                } else {
+                                    // Get booking statistics in single query
+                                    $sql = "SELECT 
+                                        COUNT(*) as total,
+                                        SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) as active 
+                                        FROM bookings 
+                                        WHERE user_id = ?";
+                                    $stmt = $conn->prepare($sql);
+                                    $stmt->bind_param("i", $_SESSION['user_id']);
+                                    
+                                    if ($stmt->execute()) {
+                                        $result = $stmt->get_result();
+                                        if ($row = $result->fetch_assoc()) {
+                                            echo "<p><strong>Total Bookings:</strong> " . $row['total'] . "</p>";
+                                            echo "<p><strong>Active Bookings:</strong> " . $row['active'] . "</p>";
+                                        }
+                                    } else {
+                                        echo "<p class='text-danger'>Error loading statistics</p>";
+                                    }
+                                    
+                                    $stmt->close();
+                                    $conn->close();
+                                }
+                                ?>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stats-card">
+                                <h4>Quick Actions</h4>
+                                <div class="list-group">
+                                    <a href="book_turf.php" class="list-group-item list-group-item-action">
+                                        <i class="fas fa-calendar-plus mr-2"></i>Book a New Turf
+                                    </a>
+                                    <a href="my_bookings.php" class="list-group-item list-group-item-action">
+                                        <i class="fas fa-list mr-2"></i>View My Bookings
+                                    </a>
+                                    <a href="contact.php" class="list-group-item list-group-item-action">
+                                        <i class="fas fa-envelope mr-2"></i>Contact Support
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Contact End -->
 
-        <!-- Footer Start -->
-        <div id="footer">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                    </div>
-                    <div class="col-md-6">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Footer End -->
+        <!-- jQuery and Bootstrap Bundle -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 
-        <!-- Back to Top -->
-        <a href="#" class="back-to-top"><i class="fa fa-chevron-up"></i></a>
-
-        <!-- JavaScript Libraries -->
-        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
-        <script src="lib/easing/easing.min.js"></script>
-        <script src="lib/slick/slick.min.js"></script>
-
-        <!-- Availability Check Script -->
         <script>
-            function checkAvailability(selectedTimeSlot) {
-                // Example logic to check availability (replace with actual backend integration)
-                const bookedSlots = ["6-10", "3-6"];
-                if (bookedSlots.includes(selectedTimeSlot)) {
-                    alert("Selected time slot is unavailable. Please choose another.");
-                    document.getElementById("time-slot").value = ""; // Reset the selection
-                }
-            }
+            $(document).ready(function() {
+                $('.dropdown-toggle').dropdown();
+            });
         </script>
-
-        <!-- Template Javascript -->
-        <script src="js/main.js"></script>
     </body>
 </html>

@@ -26,6 +26,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['slot_id'])) {
     $slot_id = $_POST['slot_id'];
     $turf_id = 1; // Assuming single turf
     $date = date('Y-m-d'); // Current date
+    $owner_id = $_SESSION['user_id']; // Get the owner's ID
     
     // Check if slot already exists for this date
     $check_sql = "SELECT id FROM turf_time_slots 
@@ -37,10 +38,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['slot_id'])) {
 
     // Only insert if slot doesn't exist
     if ($check_result->num_rows === 0) {
-        $sql = "INSERT INTO turf_time_slots (turf_id, slot_id, date, is_available) 
-                VALUES (?, ?, ?, 1)";
+        $sql = "INSERT INTO turf_time_slots (turf_id, slot_id, date, is_available, is_owner_reserved, booked_by, booking_status) 
+                VALUES (?, ?, ?, 0, 1, ?, 'Reserved by Owner')";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iis", $turf_id, $slot_id, $date);
+        $stmt->bind_param("iisi", $turf_id, $slot_id, $date, $owner_id);
         $stmt->execute();
     }
 }
@@ -55,11 +56,18 @@ $sql = "SELECT fts.*
 $result = $conn->query($sql);
 
 // Fetch reserved time slots for current date only
-$reserved_sql = "SELECT fts.start_time, fts.end_time, tts.date, tts.is_available
-                 FROM turf_time_slots tts
-                 JOIN fixed_time_slots fts ON tts.slot_id = fts.id
-                 WHERE tts.date = CURRENT_DATE
-                 ORDER BY fts.start_time";
+$reserved_sql = "SELECT 
+    fts.start_time, 
+    fts.end_time, 
+    tts.date, 
+    tts.is_available,
+    COALESCE(tts.booking_status, 'Available') as booking_status,
+    COALESCE(u.name, 'Not Booked') as booked_by_name
+FROM turf_time_slots tts
+JOIN fixed_time_slots fts ON tts.slot_id = fts.id
+LEFT JOIN users u ON tts.booked_by = u.id
+WHERE tts.date = CURRENT_DATE
+ORDER BY fts.start_time";
 $reserved_result = $conn->query($reserved_sql);
 ?>
 
@@ -380,9 +388,13 @@ $reserved_result = $conn->query($reserved_sql);
                             <td><?php echo htmlspecialchars($reserved['start_time']); ?></td>
                             <td><?php echo htmlspecialchars($reserved['end_time']); ?></td>
                             <td>
-                                <span class="status <?php echo $reserved['is_available'] ? 'available' : 'reserved'; ?>">
-                                    <?php echo $reserved['is_available'] ? 'Available' : 'Reserved'; ?>
-                                </span>
+                                <?php if ($reserved['is_available']): ?>
+                                    <span class="status available">Available</span>
+                                <?php else: ?>
+                                    <span class="status reserved">
+                                        Reserved by <?php echo htmlspecialchars($reserved['booked_by_name']); ?>
+                                    </span>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endwhile; ?>

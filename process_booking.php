@@ -25,59 +25,88 @@ if ($conn->connect_error) {
 $user_id = $_SESSION['user_id'];
 $turf_id = $_POST['turf_id'];
 $time_slot_id = $_POST['time_slot'];
+$booking_date = $_POST['date'];
 $is_owner_booking = isset($_POST['is_owner_booking']) ? 1 : 0;
-$status = 'confirmed';  // Default status
+$status = 'pending';  // Default status is pending until owner confirms
 
-// First, verify that the time slot exists
-$verify_slot_sql = "SELECT id FROM fixed_time_slots WHERE id = ?";
-$verify_stmt = $conn->prepare($verify_slot_sql);
-$verify_stmt->bind_param("i", $time_slot_id);
-$verify_stmt->execute();
-$verify_result = $verify_stmt->get_result();
+try {
+    // Start transaction
+    $conn->begin_transaction();
 
-if ($verify_result->num_rows === 0) {
+    // First, verify that the time slot exists
+    $verify_slot_sql = "SELECT id FROM fixed_time_slots WHERE id = ?";
+    $verify_stmt = $conn->prepare($verify_slot_sql);
+    $verify_stmt->bind_param("i", $time_slot_id);
+    $verify_stmt->execute();
+    $verify_result = $verify_stmt->get_result();
+
+    if ($verify_result->num_rows === 0) {
+        throw new Exception('Invalid time slot selected');
+    }
+    $verify_stmt->close();
+
+    // Check if this slot is already booked
+    $check_sql = "SELECT id FROM turf_time_slots 
+                  WHERE turf_id = ? 
+                  AND slot_id = ? 
+                  AND date = ? 
+                  AND (booking_status = 'confirmed' OR booking_status = 'pending')";
+    $check_stmt = $conn->prepare($check_sql);
+    $check_stmt->bind_param("iis", $turf_id, $time_slot_id, $booking_date);
+    $check_stmt->execute();
+    $result = $check_stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        throw new Exception('This time slot is already booked');
+    }
+    $check_stmt->close();
+
+    // Insert or update the turf_time_slots entry
+    $booking_sql = "INSERT INTO turf_time_slots 
+                    (turf_id, slot_id, date, is_available, is_owner_reserved, booked_by, booking_status, created_at) 
+                    VALUES (?, ?, ?, 0, ?, ?, ?, NOW())
+                    ON DUPLICATE KEY UPDATE 
+                    is_available = 0,
+                    is_owner_reserved = ?,
+                    booked_by = ?,
+                    booking_status = ?";
+    
+    $stmt = $conn->prepare($booking_sql);
+    $stmt->bind_param("iisiisiss", 
+        $turf_id, 
+        $time_slot_id, 
+        $booking_date, 
+        $is_owner_booking,
+        $user_id,
+        $status,
+        $is_owner_booking,
+        $user_id,
+        $status
+    );
+
+    if (!$stmt->execute()) {
+        throw new Exception('Failed to create booking');
+    }
+
+    // Commit the transaction
+    $conn->commit();
+
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => true,
+        'message' => 'Booking created successfully'
+    ]);
+
+} catch (Exception $e) {
+    // Rollback the transaction
+    $conn->rollback();
+
     header('Content-Type: application/json');
     echo json_encode([
         'success' => false,
-        'message' => 'Invalid time slot selected'
+        'message' => $e->getMessage()
     ]);
-    exit();
+} finally {
+    $conn->close();
 }
-$verify_stmt->close();
-
-// Check if this slot is already booked
-$check_sql = "SELECT booking_id FROM bookings WHERE turf_id = ? AND turf_time_slot_id = ? AND status != 'cancelled'";
-$check_stmt = $conn->prepare($check_sql);
-$check_stmt->bind_param("ii", $turf_id, $time_slot_id);
-$check_stmt->execute();
-$result = $check_stmt->get_result();
-
-if ($result->num_rows > 0) {
-    header('Content-Type: application/json');
-    echo json_encode([
-        'success' => false,
-        'message' => 'This time slot is already booked'
-    ]);
-    exit();
-}
-$check_stmt->close();
-
-// Insert the booking
-$sql = "INSERT INTO bookings (user_id, turf_id, turf_time_slot_id, status, is_owner_booking) VALUES (?, ?, ?, ?, ?)";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("iiisi", $user_id, $turf_id, $time_slot_id, $status, $is_owner_booking);
-
-header('Content-Type: application/json');
-
-if ($stmt->execute()) {
-    echo json_encode(['success' => true]);
-} else {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Failed to create booking: ' . $stmt->error
-    ]);
-}
-
-$stmt->close();
-$conn->close();
 ?>

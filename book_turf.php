@@ -119,27 +119,27 @@ function fetchAvailableSlots(date, turfId) {
             const currentDate = new Date();
             const selectedDate = new Date(date);
             const isToday = selectedDate.toDateString() === currentDate.toDateString();
-            const currentTime = currentDate.getHours() * 60 + currentDate.getMinutes(); // Current time in minutes
+            const currentTime = currentDate.getHours() * 60 + currentDate.getMinutes();
+
+            let availableSlots = 0;
 
             data.slots.forEach(slot => {
-                // Convert slot time to minutes for comparison
                 const [hours, minutes] = slot.start_time.split(':');
                 const slotTime = parseInt(hours) * 60 + parseInt(minutes);
 
-                // Show slot if:
-                // 1. It's a future date, or
-                // 2. It's today and the slot time is in the future
-                // 3. And the slot is not already booked
-                if ((!isToday || (isToday && slotTime > currentTime)) && !slot.booked) {
+                if ((!isToday || (isToday && slotTime > currentTime)) && slot.is_available) {
                     const option = document.createElement('option');
-                    option.value = slot.id;
+                    option.value = JSON.stringify({
+                        id: slot.id,
+                        booking_id: slot.slot_booking_id
+                    });
                     option.textContent = `${slot.start_time} - ${slot.end_time}`;
                     timeSlotSelect.appendChild(option);
+                    availableSlots++;
                 }
             });
 
-            // Show message if no slots are available
-            if (timeSlotSelect.options.length === 1) { // Only the default option exists
+            if (availableSlots === 0) {
                 timeSlotSelect.innerHTML = '<option value="">No available slots for this date</option>';
             }
         })
@@ -149,11 +149,18 @@ function fetchAvailableSlots(date, turfId) {
         });
 }
 
-// Add this new code after the existing functions
+// Update the form submission handler
 document.getElementById('booking-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
+    const slotData = JSON.parse(formData.get('time_slot'));
+    
+    // Update the time_slot value with the correct ID
+    formData.set('time_slot', slotData.id);
+    if (slotData.booking_id) {
+        formData.set('booking_id', slotData.booking_id);
+    }
     
     fetch('process_booking.php', {
         method: 'POST',

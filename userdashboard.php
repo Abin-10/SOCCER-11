@@ -128,12 +128,12 @@ $user_name = $_SESSION['user_name'];
                                 if ($conn->connect_error) {
                                     echo "<p class='text-danger'>Unable to fetch statistics</p>";
                                 } else {
-                                    // Get booking statistics in single query
+                                    // Get booking statistics using turf_time_slots table
                                     $sql = "SELECT 
                                         COUNT(*) as total,
-                                        SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) as active 
-                                        FROM bookings 
-                                        WHERE user_id = ?";
+                                        SUM(CASE WHEN booking_status = 'confirmed' THEN 1 ELSE 0 END) as active 
+                                        FROM turf_time_slots 
+                                        WHERE booked_by = ?";
                                     $stmt = $conn->prepare($sql);
                                     $stmt->bind_param("i", $_SESSION['user_id']);
                                     

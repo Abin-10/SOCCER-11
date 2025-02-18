@@ -192,3 +192,180 @@ Stack trace:
                 ORDER BY ts.start_time
 [17-Feb-2025 18:10:22 Europe/Berlin] Parameters: turf_id=1, date=2025-02-18
 [17-Feb-2025 18:10:22 Europe/Berlin] Response data: {"slots":[{"id":3,"start_time":"06:00:00","end_time":"07:00:00","booked":false},{"id":6,"start_time":"07:00:00","end_time":"08:00:00","booked":false},{"id":7,"start_time":"08:00:00","end_time":"09:00:00","booked":false},{"id":8,"start_time":"09:00:00","end_time":"10:00:00","booked":false},{"id":9,"start_time":"10:00:00","end_time":"11:00:00","booked":false},{"id":10,"start_time":"11:00:00","end_time":"12:00:00","booked":false},{"id":11,"start_time":"12:00:00","end_time":"13:00:00","booked":false},{"id":12,"start_time":"13:00:00","end_time":"14:00:00","booked":false},{"id":13,"start_time":"14:00:00","end_time":"15:00:00","booked":false},{"id":14,"start_time":"15:00:00","end_time":"16:00:00","booked":false},{"id":15,"start_time":"16:00:00","end_time":"17:00:00","booked":false},{"id":16,"start_time":"17:00:00","end_time":"18:00:00","booked":false},{"id":17,"start_time":"18:00:00","end_time":"19:00:00","booked":false},{"id":18,"start_time":"19:00:00","end_time":"20:00:00","booked":false},{"id":19,"start_time":"20:00:00","end_time":"21:00:00","booked":false},{"id":20,"start_time":"21:00:00","end_time":"22:00:00","booked":false},{"id":21,"start_time":"22:00:00","end_time":"23:00:00","booked":false}]}
+[18-Feb-2025 16:02:43 Europe/Berlin] Request parameters: {"date":"2025-02-18","turf_id":"1","_":"1739890963397"}
+[18-Feb-2025 16:02:43 Europe/Berlin] SQL Query: SELECT 
+                    ts.id,
+                    ts.start_time,
+                    ts.end_time,
+                    b.booking_id IS NOT NULL as booked
+                FROM fixed_time_slots ts
+                LEFT JOIN bookings b ON b.turf_time_slot_id = ts.id 
+                    AND b.turf_id = ? 
+                    AND DATE(b.created_at) = ?
+                    AND b.status != 'cancelled'
+                WHERE ts.id > 0
+                ORDER BY ts.start_time
+[18-Feb-2025 16:02:43 Europe/Berlin] Parameters: turf_id=1, date=2025-02-18
+[18-Feb-2025 16:02:43 Europe/Berlin] Error occurred: Table 'registration.bookings' doesn't exist
+[18-Feb-2025 16:04:25 Europe/Berlin] Request parameters: {"date":"2025-02-18","turf_id":"1","_":"1739891065463"}
+[18-Feb-2025 16:04:25 Europe/Berlin] SQL Query: SELECT 
+                    ts.id,
+                    ts.start_time,
+                    ts.end_time,
+                    b.booking_id IS NOT NULL as booked
+                FROM fixed_time_slots ts
+                LEFT JOIN bookings b ON b.turf_time_slot_id = ts.id 
+                    AND b.turf_id = ? 
+                    AND DATE(b.created_at) = ?
+                    AND b.status != 'cancelled'
+                WHERE ts.id > 0
+                ORDER BY ts.start_time
+[18-Feb-2025 16:04:25 Europe/Berlin] Parameters: turf_id=1, date=2025-02-18
+[18-Feb-2025 16:04:25 Europe/Berlin] Error occurred: Table 'registration.bookings' doesn't exist
+[18-Feb-2025 16:07:43 Europe/Berlin] Request parameters: {"date":"2025-02-18","turf_id":"1","_":"1739891263091"}
+[18-Feb-2025 16:07:43 Europe/Berlin] SQL Query: SELECT 
+                fts.id,
+                fts.start_time,
+                fts.end_time,
+                tts.booking_status,
+                tts.is_available,
+                tts.is_owner_reserved
+            FROM fixed_time_slots fts
+            LEFT JOIN turf_time_slots tts ON fts.id = tts.slot_id 
+                AND tts.turf_id = ? 
+                AND tts.date = ?
+            ORDER BY fts.start_time
+[18-Feb-2025 16:07:43 Europe/Berlin] Parameters: turf_id=1, date=2025-02-18
+[18-Feb-2025 16:07:43 Europe/Berlin] Response data: {"slots":[{"id":3,"start_time":"06:00:00","end_time":"07:00:00","booking_status":null,"is_available":true},{"id":6,"start_time":"07:00:00","end_time":"08:00:00","booking_status":null,"is_available":true},{"id":7,"start_time":"08:00:00","end_time":"09:00:00","booking_status":null,"is_available":true},{"id":8,"start_time":"09:00:00","end_time":"10:00:00","booking_status":"","is_available":false},{"id":9,"start_time":"10:00:00","end_time":"11:00:00","booking_status":null,"is_available":true},{"id":10,"start_time":"11:00:00","end_time":"12:00:00","booking_status":null,"is_available":true},{"id":11,"start_time":"12:00:00","end_time":"13:00:00","booking_status":null,"is_available":true},{"id":12,"start_time":"13:00:00","end_time":"14:00:00","booking_status":null,"is_available":true},{"id":13,"start_time":"14:00:00","end_time":"15:00:00","booking_status":null,"is_available":true},{"id":14,"start_time":"15:00:00","end_time":"16:00:00","booking_status":null,"is_available":true},{"id":15,"start_time":"16:00:00","end_time":"17:00:00","booking_status":null,"is_available":true},{"id":16,"start_time":"17:00:00","end_time":"18:00:00","booking_status":null,"is_available":true},{"id":17,"start_time":"18:00:00","end_time":"19:00:00","booking_status":null,"is_available":true},{"id":18,"start_time":"19:00:00","end_time":"20:00:00","booking_status":null,"is_available":true},{"id":19,"start_time":"20:00:00","end_time":"21:00:00","booking_status":null,"is_available":true},{"id":20,"start_time":"21:00:00","end_time":"22:00:00","booking_status":null,"is_available":true},{"id":21,"start_time":"22:00:00","end_time":"23:00:00","booking_status":null,"is_available":true}]}
+[18-Feb-2025 16:08:46 Europe/Berlin] Request parameters: {"date":"2025-02-18","turf_id":"1","_":"1739891326554"}
+[18-Feb-2025 16:08:46 Europe/Berlin] SQL Query: SELECT 
+                fts.id,
+                fts.start_time,
+                fts.end_time,
+                COALESCE(tts.booking_status, 'available') as booking_status,
+                COALESCE(tts.is_available, 1) as is_available,
+                COALESCE(tts.is_owner_reserved, 0) as is_owner_reserved
+            FROM fixed_time_slots fts
+            LEFT JOIN turf_time_slots tts ON fts.id = tts.slot_id 
+                AND tts.turf_id = ? 
+                AND tts.date = ?
+            ORDER BY fts.start_time
+[18-Feb-2025 16:08:46 Europe/Berlin] Parameters: turf_id=1, date=2025-02-18
+[18-Feb-2025 16:08:46 Europe/Berlin] Response data: {"slots":[{"id":3,"start_time":"06:00:00","end_time":"07:00:00","booking_status":"available","is_available":true},{"id":6,"start_time":"07:00:00","end_time":"08:00:00","booking_status":"available","is_available":true},{"id":7,"start_time":"08:00:00","end_time":"09:00:00","booking_status":"available","is_available":true},{"id":8,"start_time":"09:00:00","end_time":"10:00:00","booking_status":"","is_available":false},{"id":9,"start_time":"10:00:00","end_time":"11:00:00","booking_status":"available","is_available":true},{"id":10,"start_time":"11:00:00","end_time":"12:00:00","booking_status":"available","is_available":true},{"id":11,"start_time":"12:00:00","end_time":"13:00:00","booking_status":"available","is_available":true},{"id":12,"start_time":"13:00:00","end_time":"14:00:00","booking_status":"available","is_available":true},{"id":13,"start_time":"14:00:00","end_time":"15:00:00","booking_status":"available","is_available":true},{"id":14,"start_time":"15:00:00","end_time":"16:00:00","booking_status":"available","is_available":true},{"id":15,"start_time":"16:00:00","end_time":"17:00:00","booking_status":"available","is_available":true},{"id":16,"start_time":"17:00:00","end_time":"18:00:00","booking_status":"available","is_available":true},{"id":17,"start_time":"18:00:00","end_time":"19:00:00","booking_status":"available","is_available":true},{"id":18,"start_time":"19:00:00","end_time":"20:00:00","booking_status":"available","is_available":true},{"id":19,"start_time":"20:00:00","end_time":"21:00:00","booking_status":"available","is_available":true},{"id":20,"start_time":"21:00:00","end_time":"22:00:00","booking_status":"available","is_available":true},{"id":21,"start_time":"22:00:00","end_time":"23:00:00","booking_status":"available","is_available":true}]}
+[18-Feb-2025 16:08:56 Europe/Berlin] Request parameters: {"date":"2025-02-19","turf_id":"1","_":"1739891336782"}
+[18-Feb-2025 16:08:56 Europe/Berlin] SQL Query: SELECT 
+                fts.id,
+                fts.start_time,
+                fts.end_time,
+                COALESCE(tts.booking_status, 'available') as booking_status,
+                COALESCE(tts.is_available, 1) as is_available,
+                COALESCE(tts.is_owner_reserved, 0) as is_owner_reserved
+            FROM fixed_time_slots fts
+            LEFT JOIN turf_time_slots tts ON fts.id = tts.slot_id 
+                AND tts.turf_id = ? 
+                AND tts.date = ?
+            ORDER BY fts.start_time
+[18-Feb-2025 16:08:56 Europe/Berlin] Parameters: turf_id=1, date=2025-02-19
+[18-Feb-2025 16:08:56 Europe/Berlin] Response data: {"slots":[{"id":3,"start_time":"06:00:00","end_time":"07:00:00","booking_status":"available","is_available":true},{"id":6,"start_time":"07:00:00","end_time":"08:00:00","booking_status":"available","is_available":true},{"id":7,"start_time":"08:00:00","end_time":"09:00:00","booking_status":"available","is_available":true},{"id":8,"start_time":"09:00:00","end_time":"10:00:00","booking_status":"available","is_available":true},{"id":9,"start_time":"10:00:00","end_time":"11:00:00","booking_status":"available","is_available":true},{"id":10,"start_time":"11:00:00","end_time":"12:00:00","booking_status":"available","is_available":true},{"id":11,"start_time":"12:00:00","end_time":"13:00:00","booking_status":"available","is_available":true},{"id":12,"start_time":"13:00:00","end_time":"14:00:00","booking_status":"available","is_available":true},{"id":13,"start_time":"14:00:00","end_time":"15:00:00","booking_status":"available","is_available":true},{"id":14,"start_time":"15:00:00","end_time":"16:00:00","booking_status":"available","is_available":true},{"id":15,"start_time":"16:00:00","end_time":"17:00:00","booking_status":"available","is_available":true},{"id":16,"start_time":"17:00:00","end_time":"18:00:00","booking_status":"available","is_available":true},{"id":17,"start_time":"18:00:00","end_time":"19:00:00","booking_status":"available","is_available":true},{"id":18,"start_time":"19:00:00","end_time":"20:00:00","booking_status":"available","is_available":true},{"id":19,"start_time":"20:00:00","end_time":"21:00:00","booking_status":"available","is_available":true},{"id":20,"start_time":"21:00:00","end_time":"22:00:00","booking_status":"available","is_available":true},{"id":21,"start_time":"22:00:00","end_time":"23:00:00","booking_status":"available","is_available":true}]}
+[18-Feb-2025 16:11:04 Europe/Berlin] Request parameters: {"date":"2025-02-18","turf_id":"1","_":"1739891464952"}
+[18-Feb-2025 16:11:04 Europe/Berlin] SQL Query: SELECT 
+                fts.id,
+                fts.start_time,
+                fts.end_time,
+                tts.id as slot_booking_id,
+                COALESCE(tts.booking_status, 'available') as booking_status,
+                COALESCE(tts.is_available, 1) as is_available,
+                COALESCE(tts.is_owner_reserved, 0) as is_owner_reserved,
+                COALESCE(tts.booked_by, 0) as booked_by
+            FROM fixed_time_slots fts
+            LEFT JOIN turf_time_slots tts ON fts.id = tts.slot_id 
+                AND tts.turf_id = ? 
+                AND tts.date = ?
+            ORDER BY fts.start_time
+[18-Feb-2025 16:11:04 Europe/Berlin] Parameters: turf_id=1, date=2025-02-18
+[18-Feb-2025 16:11:04 Europe/Berlin] Response data: {"slots":[{"id":3,"start_time":"06:00:00","end_time":"07:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":6,"start_time":"07:00:00","end_time":"08:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":7,"start_time":"08:00:00","end_time":"09:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":8,"start_time":"09:00:00","end_time":"10:00:00","booking_status":"","is_available":false,"slot_booking_id":53},{"id":9,"start_time":"10:00:00","end_time":"11:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":10,"start_time":"11:00:00","end_time":"12:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":11,"start_time":"12:00:00","end_time":"13:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":12,"start_time":"13:00:00","end_time":"14:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":13,"start_time":"14:00:00","end_time":"15:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":14,"start_time":"15:00:00","end_time":"16:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":15,"start_time":"16:00:00","end_time":"17:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":16,"start_time":"17:00:00","end_time":"18:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":17,"start_time":"18:00:00","end_time":"19:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":18,"start_time":"19:00:00","end_time":"20:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":19,"start_time":"20:00:00","end_time":"21:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":20,"start_time":"21:00:00","end_time":"22:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":21,"start_time":"22:00:00","end_time":"23:00:00","booking_status":"available","is_available":true,"slot_booking_id":null}]}
+[18-Feb-2025 16:12:43 Europe/Berlin] Request parameters: {"date":"2025-02-18","turf_id":"1","_":"1739891563384"}
+[18-Feb-2025 16:12:43 Europe/Berlin] SQL Query: SELECT 
+                fts.id,
+                fts.start_time,
+                fts.end_time,
+                tts.id as slot_booking_id,
+                COALESCE(tts.booking_status, 'available') as booking_status,
+                COALESCE(tts.is_available, 1) as is_available,
+                COALESCE(tts.is_owner_reserved, 0) as is_owner_reserved,
+                COALESCE(tts.booked_by, 0) as booked_by
+            FROM fixed_time_slots fts
+            LEFT JOIN turf_time_slots tts ON fts.id = tts.slot_id 
+                AND tts.turf_id = ? 
+                AND tts.date = ?
+            ORDER BY fts.start_time
+[18-Feb-2025 16:12:43 Europe/Berlin] Parameters: turf_id=1, date=2025-02-18
+[18-Feb-2025 16:12:43 Europe/Berlin] Response data: {"slots":[{"id":3,"start_time":"06:00:00","end_time":"07:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":6,"start_time":"07:00:00","end_time":"08:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":7,"start_time":"08:00:00","end_time":"09:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":8,"start_time":"09:00:00","end_time":"10:00:00","booking_status":"","is_available":false,"slot_booking_id":53},{"id":9,"start_time":"10:00:00","end_time":"11:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":10,"start_time":"11:00:00","end_time":"12:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":11,"start_time":"12:00:00","end_time":"13:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":12,"start_time":"13:00:00","end_time":"14:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":13,"start_time":"14:00:00","end_time":"15:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":14,"start_time":"15:00:00","end_time":"16:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":15,"start_time":"16:00:00","end_time":"17:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":16,"start_time":"17:00:00","end_time":"18:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":17,"start_time":"18:00:00","end_time":"19:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":18,"start_time":"19:00:00","end_time":"20:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":19,"start_time":"20:00:00","end_time":"21:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":20,"start_time":"21:00:00","end_time":"22:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":21,"start_time":"22:00:00","end_time":"23:00:00","booking_status":"available","is_available":true,"slot_booking_id":null}]}
+[18-Feb-2025 16:16:15 Europe/Berlin] Request parameters: {"date":"2025-02-18","turf_id":"1","_":"1739891775374"}
+[18-Feb-2025 16:16:15 Europe/Berlin] SQL Query: SELECT 
+                fts.id,
+                fts.start_time,
+                fts.end_time,
+                tts.id as slot_booking_id,
+                COALESCE(tts.booking_status, 'available') as booking_status,
+                COALESCE(tts.is_available, 1) as is_available,
+                COALESCE(tts.is_owner_reserved, 0) as is_owner_reserved,
+                COALESCE(tts.booked_by, 0) as booked_by
+            FROM fixed_time_slots fts
+            LEFT JOIN turf_time_slots tts ON fts.id = tts.slot_id 
+                AND tts.turf_id = ? 
+                AND tts.date = ?
+            ORDER BY fts.start_time
+[18-Feb-2025 16:16:15 Europe/Berlin] Parameters: turf_id=1, date=2025-02-18
+[18-Feb-2025 16:16:15 Europe/Berlin] Response data: {"slots":[{"id":3,"start_time":"06:00:00","end_time":"07:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":6,"start_time":"07:00:00","end_time":"08:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":7,"start_time":"08:00:00","end_time":"09:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":8,"start_time":"09:00:00","end_time":"10:00:00","booking_status":"","is_available":false,"slot_booking_id":53},{"id":9,"start_time":"10:00:00","end_time":"11:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":10,"start_time":"11:00:00","end_time":"12:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":11,"start_time":"12:00:00","end_time":"13:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":12,"start_time":"13:00:00","end_time":"14:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":13,"start_time":"14:00:00","end_time":"15:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":14,"start_time":"15:00:00","end_time":"16:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":15,"start_time":"16:00:00","end_time":"17:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":16,"start_time":"17:00:00","end_time":"18:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":17,"start_time":"18:00:00","end_time":"19:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":18,"start_time":"19:00:00","end_time":"20:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":19,"start_time":"20:00:00","end_time":"21:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":20,"start_time":"21:00:00","end_time":"22:00:00","booking_status":"confirmed","is_available":false,"slot_booking_id":54},{"id":21,"start_time":"22:00:00","end_time":"23:00:00","booking_status":"available","is_available":true,"slot_booking_id":null}]}
+[18-Feb-2025 16:21:03 Europe/Berlin] Request parameters: {"date":"2025-02-18","turf_id":"1","_":"1739892063630"}
+[18-Feb-2025 16:21:03 Europe/Berlin] SQL Query: SELECT 
+                fts.id,
+                fts.start_time,
+                fts.end_time,
+                tts.id as slot_booking_id,
+                COALESCE(tts.booking_status, 'available') as booking_status,
+                COALESCE(tts.is_available, 1) as is_available,
+                COALESCE(tts.is_owner_reserved, 0) as is_owner_reserved,
+                COALESCE(tts.booked_by, 0) as booked_by
+            FROM fixed_time_slots fts
+            LEFT JOIN turf_time_slots tts ON fts.id = tts.slot_id 
+                AND tts.turf_id = ? 
+                AND tts.date = ?
+            ORDER BY fts.start_time
+[18-Feb-2025 16:21:03 Europe/Berlin] Parameters: turf_id=1, date=2025-02-18
+[18-Feb-2025 16:21:03 Europe/Berlin] Response data: {"slots":[{"id":3,"start_time":"06:00:00","end_time":"07:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":6,"start_time":"07:00:00","end_time":"08:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":7,"start_time":"08:00:00","end_time":"09:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":8,"start_time":"09:00:00","end_time":"10:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":9,"start_time":"10:00:00","end_time":"11:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":10,"start_time":"11:00:00","end_time":"12:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":11,"start_time":"12:00:00","end_time":"13:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":12,"start_time":"13:00:00","end_time":"14:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":13,"start_time":"14:00:00","end_time":"15:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":14,"start_time":"15:00:00","end_time":"16:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":15,"start_time":"16:00:00","end_time":"17:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":16,"start_time":"17:00:00","end_time":"18:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":17,"start_time":"18:00:00","end_time":"19:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":18,"start_time":"19:00:00","end_time":"20:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":19,"start_time":"20:00:00","end_time":"21:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":20,"start_time":"21:00:00","end_time":"22:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":21,"start_time":"22:00:00","end_time":"23:00:00","booking_status":"available","is_available":true,"slot_booking_id":null}]}
+[18-Feb-2025 16:27:31 Europe/Berlin] Request parameters: {"date":"2025-02-18","turf_id":"1","_":"1739892451384"}
+[18-Feb-2025 16:27:31 Europe/Berlin] SQL Query: SELECT 
+                fts.id,
+                fts.start_time,
+                fts.end_time,
+                tts.id as slot_booking_id,
+                COALESCE(tts.booking_status, 'available') as booking_status,
+                COALESCE(tts.is_available, 1) as is_available,
+                COALESCE(tts.is_owner_reserved, 0) as is_owner_reserved,
+                COALESCE(tts.booked_by, 0) as booked_by
+            FROM fixed_time_slots fts
+            LEFT JOIN turf_time_slots tts ON fts.id = tts.slot_id 
+                AND tts.turf_id = ? 
+                AND tts.date = ?
+            ORDER BY fts.start_time
+[18-Feb-2025 16:27:31 Europe/Berlin] Parameters: turf_id=1, date=2025-02-18
+[18-Feb-2025 16:27:31 Europe/Berlin] Response data: {"slots":[{"id":3,"start_time":"06:00:00","end_time":"07:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":6,"start_time":"07:00:00","end_time":"08:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":7,"start_time":"08:00:00","end_time":"09:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":8,"start_time":"09:00:00","end_time":"10:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":9,"start_time":"10:00:00","end_time":"11:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":10,"start_time":"11:00:00","end_time":"12:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":11,"start_time":"12:00:00","end_time":"13:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":12,"start_time":"13:00:00","end_time":"14:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":13,"start_time":"14:00:00","end_time":"15:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":14,"start_time":"15:00:00","end_time":"16:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":15,"start_time":"16:00:00","end_time":"17:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":16,"start_time":"17:00:00","end_time":"18:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":17,"start_time":"18:00:00","end_time":"19:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":18,"start_time":"19:00:00","end_time":"20:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":19,"start_time":"20:00:00","end_time":"21:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":20,"start_time":"21:00:00","end_time":"22:00:00","booking_status":"confirmed","is_available":false,"slot_booking_id":56},{"id":21,"start_time":"22:00:00","end_time":"23:00:00","booking_status":"available","is_available":true,"slot_booking_id":null}]}
+[18-Feb-2025 16:32:39 Europe/Berlin] Request parameters: {"date":"2025-02-19","turf_id":"1","_":"1739892759241"}
+[18-Feb-2025 16:32:39 Europe/Berlin] SQL Query: SELECT 
+                fts.id,
+                fts.start_time,
+                fts.end_time,
+                tts.id as slot_booking_id,
+                COALESCE(tts.booking_status, 'available') as booking_status,
+                COALESCE(tts.is_available, 1) as is_available,
+                COALESCE(tts.is_owner_reserved, 0) as is_owner_reserved,
+                COALESCE(tts.booked_by, 0) as booked_by
+            FROM fixed_time_slots fts
+            LEFT JOIN turf_time_slots tts ON fts.id = tts.slot_id 
+                AND tts.turf_id = ? 
+                AND tts.date = ?
+            ORDER BY fts.start_time
+[18-Feb-2025 16:32:39 Europe/Berlin] Parameters: turf_id=1, date=2025-02-19
+[18-Feb-2025 16:32:39 Europe/Berlin] Response data: {"slots":[{"id":3,"start_time":"06:00:00","end_time":"07:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":6,"start_time":"07:00:00","end_time":"08:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":7,"start_time":"08:00:00","end_time":"09:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":8,"start_time":"09:00:00","end_time":"10:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":9,"start_time":"10:00:00","end_time":"11:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":10,"start_time":"11:00:00","end_time":"12:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":11,"start_time":"12:00:00","end_time":"13:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":12,"start_time":"13:00:00","end_time":"14:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":13,"start_time":"14:00:00","end_time":"15:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":14,"start_time":"15:00:00","end_time":"16:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":15,"start_time":"16:00:00","end_time":"17:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":16,"start_time":"17:00:00","end_time":"18:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":17,"start_time":"18:00:00","end_time":"19:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":18,"start_time":"19:00:00","end_time":"20:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":19,"start_time":"20:00:00","end_time":"21:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":20,"start_time":"21:00:00","end_time":"22:00:00","booking_status":"available","is_available":true,"slot_booking_id":null},{"id":21,"start_time":"22:00:00","end_time":"23:00:00","booking_status":"available","is_available":true,"slot_booking_id":null}]}

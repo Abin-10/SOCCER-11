@@ -1,33 +1,23 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
-    die(json_encode(['error' => 'Unauthorized']));
-}
+header('Content-Type: application/json');
 
 $conn = new mysqli("localhost", "root", "", "registration");
 
 if ($conn->connect_error) {
-    die(json_encode(['error' => 'Connection failed']));
+    die(json_encode(['error' => 'Connection failed: ' . $conn->connect_error]));
 }
 
-if (isset($_POST['email'])) {
-    // Sanitize the email input
-    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
-    
-    // Prepare statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    
-    // Return true if email is unique (count = 0), false if it exists
-    echo json_encode(['unique' => ($row['count'] == 0)]);
-    
-    $stmt->close();
-} else {
-    echo json_encode(['error' => 'No email provided']);
-}
+$email = $_POST['email'] ?? '';
+$email = $conn->real_escape_string($email);
+
+// If editing user, exclude current user's email from check
+$userId = $_POST['user_id'] ?? null;
+$userClause = $userId ? " AND id != '$userId'" : "";
+
+$query = "SELECT COUNT(*) as count FROM users WHERE email = '$email'" . $userClause;
+$result = $conn->query($query);
+$row = $result->fetch_assoc();
+
+echo json_encode(['unique' => $row['count'] == 0]);
 
 $conn->close(); 

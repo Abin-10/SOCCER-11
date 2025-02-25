@@ -107,6 +107,7 @@ try {
         'message' => $e->getMessage()
     ]);
 } finally {
+    $stmt->close();
     $conn->close();
 }
 ?>

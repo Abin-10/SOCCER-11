@@ -49,6 +49,12 @@ function validateEmail($email) {
            !preg_match('/@gmail\.comm$/i', $email); // Check for extra "m"
 }
 
+// Function to validate password
+function validatePassword($password) {
+    // Check if the password is at least 8 characters long and includes uppercase, lowercase, and numbers
+    return preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/', $password);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = isset($_POST['name']) ? trim($_POST['name']) : '';
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
@@ -57,10 +63,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validate inputs
     if (empty($name) || empty($email) || empty($phone)) {
         $error_message = "All fields are required!";
-    } elseif (!validatePhoneNumber($phone)) {
-        $error_message = "Invalid phone number format!";
     } elseif (!validateEmail($email)) {
-        $error_message = "Invalid email format!";
+        $error_message = "Invalid email format! Must be a valid Gmail address and not have misspellings or incorrect domains.";
+    } elseif (!validatePhoneNumber($phone)) {
+        $error_message = "Phone number must be 10 digits long, start with 6, 7, 8, or 9, and contain no spaces or special characters!";
+    } elseif (isset($_POST['reset_password'])) {
+        $current_password = trim($_POST['current_password']);
+        $new_password = trim($_POST['new_password']);
+        $confirm_password = trim($_POST['confirm_password']);
+        
+        // Validate current and new passwords
+        if (empty($current_password) || empty($new_password) || empty($confirm_password)) {
+            $error_message = "All fields are required!";
+        } elseif ($new_password !== $confirm_password) {
+            $error_message = "New passwords do not match!";
+        } else {
+            // Check current password
+            $sql = "SELECT password FROM users WHERE id = ?";
+            $password_stmt = $conn->prepare($sql);
+            $password_stmt->bind_param("i", $user_id);
+            $password_stmt->execute();
+            $result = $password_stmt->get_result();
+            $user_data = $result->fetch_assoc();
+
+            if (password_verify($current_password, $user_data['password'])) {
+                // Update password
+                $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+                $update_sql = "UPDATE users SET password = ? WHERE id = ?";
+                $update_password_stmt = $conn->prepare($update_sql);
+                $update_password_stmt->bind_param("si", $hashed_password, $user_id);
+                
+                if ($update_password_stmt->execute()) {
+                    $success_message = "Password updated successfully!";
+                } else {
+                    $error_message = "Error updating password: " . $conn->error;
+                }
+                $update_password_stmt->close();
+            } else {
+                $error_message = "Current password is incorrect!";
+            }
+            $password_stmt->close();
+        }
     } else {
         $update_sql = "UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?";
         $update_stmt = $conn->prepare($update_sql);
@@ -76,45 +119,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $error_message = "Error updating profile: " . $conn->error;
         }
-    }
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset_password'])) {
-    $current_password = trim($_POST['current_password']);
-    $new_password = trim($_POST['new_password']);
-    $confirm_password = trim($_POST['confirm_password']);
-    
-    // Validate inputs
-    if (empty($current_password) || empty($new_password) || empty($confirm_password)) {
-        $error_message = "All fields are required!";
-    } elseif ($new_password !== $confirm_password) {
-        $error_message = "New passwords do not match!";
-    } else {
-        // Check current password
-        $sql = "SELECT password FROM users WHERE id = ?";
-        $password_stmt = $conn->prepare($sql);
-        $password_stmt->bind_param("i", $user_id);
-        $password_stmt->execute();
-        $result = $password_stmt->get_result();
-        $user_data = $result->fetch_assoc();
-
-        if (password_verify($current_password, $user_data['password'])) {
-            // Update password
-            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-            $update_sql = "UPDATE users SET password = ? WHERE id = ?";
-            $update_password_stmt = $conn->prepare($update_sql);
-            $update_password_stmt->bind_param("si", $hashed_password, $user_id);
-            
-            if ($update_password_stmt->execute()) {
-                $success_message = "Password updated successfully!";
-            } else {
-                $error_message = "Error updating password: " . $conn->error;
-            }
-            $update_password_stmt->close(); // Close the update password statement
-        } else {
-            $error_message = "Current password is incorrect!";
-        }
-        $password_stmt->close(); // Close the password check statement
     }
 }
 

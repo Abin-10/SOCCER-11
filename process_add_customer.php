@@ -18,6 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $conn->real_escape_string($_POST['email']);
     $phone = $conn->real_escape_string($_POST['phone']);
     $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
     
     // Validate email format
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -41,9 +42,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
     
-    // Validate password strength
-    if (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/", $password)) {
-        $_SESSION['error'] = "Password does not meet requirements";
+    // Validate password
+    if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/', $password)) {
+        $_SESSION['error'] = 'Password must be at least 8 characters and include uppercase, lowercase, and numbers';
+        header("Location: owner_customer.php");
+        exit();
+    }
+
+    if ($password !== $confirm_password) {
+        $_SESSION['error'] = 'Passwords do not match!';
         header("Location: owner_customer.php");
         exit();
     }

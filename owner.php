@@ -16,6 +16,11 @@ $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
+// Get total users count
+$users_query = "SELECT COUNT(*) as total_users FROM users";
+$users_result = $conn->query($users_query);
+$total_users = $users_result->fetch_assoc()['total_users'];
 ?>
 
 <!DOCTYPE html>
@@ -44,7 +49,7 @@ if ($conn->connect_error) {
         }
 
         /* Sidebar Styles */
-        .sidebar {
+        .admin-sidebar {
             width: 280px;
             background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
             color: white;
@@ -58,6 +63,9 @@ if ($conn->connect_error) {
             padding: 15px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .logo i {
@@ -68,14 +76,14 @@ if ($conn->connect_error) {
 
         .logo h2 {
             font-size: 20px;
+            color: white;
+            margin: 0;
         }
 
         .menu-items {
             list-style: none;
-        }
-
-        .menu-items li {
-            margin-bottom: 10px;
+            padding: 0;
+            margin: 0;
         }
 
         .menu-items a {
@@ -88,12 +96,11 @@ if ($conn->connect_error) {
             border-radius: 12px;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             margin-bottom: 8px;
-            background: linear-gradient(to right, #4CAF50 0%, #ffffff 100%);
+            background: linear-gradient(to right, transparent 0%, #ffffff 100%);
             background-size: 200% 100%;
             background-position: left bottom;
             border: 1px solid rgba(255,255,255,0.1);
             position: relative;
-            overflow: hidden;
         }
 
         .menu-items a:hover {
@@ -101,39 +108,22 @@ if ($conn->connect_error) {
             transform: translateX(12px);
             box-shadow: 0 6px 20px rgba(76,175,80,0.25);
             color: #2E7D32;
-            border-color: rgba(76,175,80,0.2);
         }
 
-        .menu-items a i {
+        .menu-items a.active {
+            background: white;
+            color: #2E7D32;
+            box-shadow: 0 6px 20px rgba(76,175,80,0.25);
+        }
+
+        .menu-items i {
+            width: 20px;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .menu-items a:hover i {
             transform: scale(1.2) rotate(5deg);
             color: #2E7D32;
-        }
-
-        .menu-items a::after {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: #ffffff;
-            border-radius: 50%;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%) translateX(-100%);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0;
-        }
-
-        .menu-items a:hover::after {
-            transform: translateY(-50%) translateX(8px);
-            opacity: 1;
-        }
-
-        .menu-items i {
-            width: 20px;
         }
 
         /* Main Content Styles */
@@ -178,12 +168,14 @@ if ($conn->connect_error) {
 
         .card {
             background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             border: none;
             position: relative;
             overflow: hidden;
+            width: 200px;
+            margin-bottom: 20px;
         }
 
         .card::before {
@@ -219,12 +211,12 @@ if ($conn->connect_error) {
         }
 
         .card .number {
-            font-size: 36px;
+            font-size: 24px;
             font-weight: 800;
             background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         /* Recent Activity Table */
@@ -309,7 +301,7 @@ if ($conn->connect_error) {
 
         /* Responsive Design */
         @media (max-width: 768px) {
-            .sidebar {
+            .admin-sidebar {
                 width: 80px;
                 padding: 15px;
             }
@@ -317,6 +309,15 @@ if ($conn->connect_error) {
             .logo h2,
             .menu-items span {
                 display: none;
+            }
+
+            .menu-items a {
+                padding: 15px;
+                justify-content: center;
+            }
+
+            .menu-items i {
+                margin: 0;
             }
 
             .main-content {
@@ -333,26 +334,41 @@ if ($conn->connect_error) {
 <body>
     <div class="dashboard">
         <!-- Sidebar -->
-        <div class="sidebar">
+        <div class="admin-sidebar">
             <div class="logo">
                 <i class="fas fa-futbol"></i>
                 <h2>SOCCER-11</h2>
             </div>
             <ul class="menu-items">
                 <li>
-                    <a href="owner.php"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                    <a href="owner.php" class="active">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="owner_bookings.php"><i class="fas fa-calendar"></i><span>Bookings</span></a>
+                    <a href="owner_bookings.php">
+                        <i class="fas fa-calendar"></i>
+                        <span>Bookings</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="owner_customer.php"><i class="fas fa-users"></i><span>Customers</span></a>
+                    <a href="owner_customer.php">
+                        <i class="fas fa-users"></i>
+                        <span>Customers</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="owner_time_slots.php"><i class="fas fa-clock"></i><span>Time Slots</span></a>
+                    <a href="owner_time_slots.php">
+                        <i class="fas fa-clock"></i>
+                        <span>Time Slots</span>
+                    </a>
                 </li>
                 <li>
-                    <a href="owner_settings.php"><i class="fas fa-cog"></i><span>Settings</span></a>
+                    <a href="owner_settings.php">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
                 </li>
             </ul>
         </div>
@@ -371,65 +387,12 @@ if ($conn->connect_error) {
             <div class="dashboard-cards">
                 <div class="card">
                     <div class="card-header">
-                        <h3>Total Bookings</h3>
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <div class="number">150</div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Revenue</h3>
-                        <i class="fas fa-dollar-sign"></i>
-                    </div>
-                    <div class="number">$5,240</div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Active Customers</h3>
+                        <h3>Total Users</h3>
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="number">85</div>
+                    <div class="number"><?php echo $total_users; ?></div>
+                    <p>Manage your users effectively and ensure a great experience!</p>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Available Slots</h3>
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="number">12</div>
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="recent-activity">
-                <h2>Recent Bookings</h2>
-                <table class="activity-table">
-                    <thead>
-                        <tr>
-                            <th>Booking ID</th>
-                            <th>Customer</th>
-                            <th>Date</th>
-                            <th>Time Slot</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>#BK001</td>
-                            <td>John Doe</td>
-                            <td>2024-02-20</td>
-                            <td>18:00 - 19:00</td>
-                            <td><span class="status active">Active</span></td>
-                        </tr>
-                        <tr>
-                            <td>#BK002</td>
-                            <td>Jane Smith</td>
-                            <td>2024-02-20</td>
-                            <td>19:00 - 20:00</td>
-                            <td><span class="status pending">Pending</span></td>
-                        </tr>
-                        <!-- Add more rows as needed -->
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>

@@ -45,25 +45,45 @@ $conn->close();
         }
 
         .admin-content {
-            max-width: 500px;
+            max-width: 600px;
             margin: 40px auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .admin-content:hover {
+            transform: translateY(-5px);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-control {
+            border: 2px solid #e8eef3;
+            border-radius: 12px;
+            padding: 12px 15px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
         }
 
         .form-group label {
             font-weight: 600;
-            color: #333;
-        }
-
-        .form-control {
-            border: 1px solid #ced4da;
-            padding: 8px;
-            font-size: 14px;
-            height: auto;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: block;
+            text-align: left;
         }
 
         .btn {
@@ -80,6 +100,29 @@ $conn->close();
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;
+        }
+
+        .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+        }
+
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .dropdown-item.active {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
         }
     </style>
 </head>

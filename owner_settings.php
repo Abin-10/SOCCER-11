@@ -28,16 +28,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = $conn->real_escape_string($_POST['email']);
         $phone = $conn->real_escape_string($_POST['phone']);
         
-        $user_id = $_SESSION['user_id'];
-        $sql = "UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssi", $name, $email, $phone, $user_id);
-        
-        if ($stmt->execute()) {
-            $_SESSION['message'] = "Profile updated successfully!";
-            $_SESSION['user_name'] = $name;
+        // Validate Gmail address
+        if (!preg_match('/^[a-zA-Z0-9._%+-]+@gmail\.com$/', $email) || 
+            preg_match('/@googlemail\.com$/', $email) || 
+            preg_match('/@1gmail\.com$/', $email) || 
+            preg_match('/@.*\./', $email)) {
+            $_SESSION['error'] = "Invalid email address! Only @gmail.com is allowed, no custom subdomains.";
+        } 
+        // Validate phone number
+        elseif (!preg_match('/^[6-9]\d{9}$/', $phone)) {
+            $_SESSION['error'] = "Invalid phone number! Must be 10 digits long, start with 6, 7, 8, or 9, and contain no spaces or special characters.";
         } else {
-            $_SESSION['error'] = "Error updating profile!";
+            $user_id = $_SESSION['user_id'];
+            $sql = "UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssi", $name, $email, $phone, $user_id);
+            
+            if ($stmt->execute()) {
+                $_SESSION['message'] = "Profile updated successfully!";
+                $_SESSION['user_name'] = $name;
+            } else {
+                $_SESSION['error'] = "Error updating profile!";
+            }
         }
     }
     
@@ -46,7 +58,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $new_password = $_POST['new_password'];
         $confirm_password = $_POST['confirm_password'];
         
-        if ($new_password === $confirm_password) {
+        // Validate new password - must have 8+ chars, uppercase, lowercase, and numbers
+        if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $new_password)) {
+            $_SESSION['error'] = "Password must be at least 8 characters and include uppercase, lowercase, and numbers";
+        } elseif ($new_password === $confirm_password) {
             $user_id = $_SESSION['user_id'];
             $sql = "SELECT password FROM users WHERE id = ?";
             $stmt = $conn->prepare($sql);

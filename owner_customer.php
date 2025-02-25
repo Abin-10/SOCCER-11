@@ -55,6 +55,7 @@ if (!$result) {
         <button class="btn btn-success mb-3" data-toggle="modal" data-target="#addCustomerModal">
             <i class="fas fa-user-plus"></i> Add Customer
         </button>
+        <a href="owner.php" class="btn btn-success float-right mb-3">Back to Dashboard</a>
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -98,7 +99,6 @@ if (!$result) {
                 <?php endwhile; ?>
             </tbody>
         </table>
-        <a href="owner.php" class="btn btn-success">Back to Dashboard</a>
     </div>
 
     <!-- Add Customer Modal -->
@@ -112,12 +112,12 @@ if (!$result) {
                 <div class="modal-body">
                     <form action="process_add_customer.php" method="POST" id="addCustomerForm" onsubmit="return validateForm()">
                         <div class="form-group">
-                            <label>Full Name</label>
+                            <label>Name</label>
                             <input type="text" name="name" class="form-control" pattern="[A-Za-z\s]{3,50}" title="Name should only contain letters and spaces, between 3-50 characters" required>
                         </div>
                         <div class="form-group">
                             <label>Email</label>
-                            <input type="email" name="email" class="form-control" id="email" required>
+                            <input type="email" name="email" class="form-control" id="email" pattern="[a-zA-Z0-9._%+-]+@gmail\.com$" title="Please enter a valid Gmail address" required>
                             <small id="emailFeedback" class="form-text"></small>
                         </div>
                         <div class="form-group">
@@ -126,8 +126,7 @@ if (!$result) {
                         </div>
                         <div class="form-group">
                             <label>Password</label>
-                            <input type="password" name="password" id="password" class="form-control" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" title="Password must be at least 8 characters and include uppercase, lowercase, number and special character" required>
-                            <small class="form-text text-muted">Password must contain at least 8 characters, including uppercase, lowercase, number and special character</small>
+                            <input type="password" name="password" id="password" class="form-control" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$" title="Password must be at least 8 characters and include uppercase, lowercase, and numbers" required>
                         </div>
                         <div class="form-group">
                             <label>Confirm Password</label>
@@ -153,7 +152,8 @@ if (!$result) {
             const email = $(this).val();
             const feedback = $('#emailFeedback');
             
-            if (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            // Check if it's a valid Gmail address
+            if (email && /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) {
                 emailTimeout = setTimeout(function() {
                     $.post('owner_customer.php', {check_email: true, email: email}, function(response) {
                         if (response === 'exists') {
@@ -161,28 +161,78 @@ if (!$result) {
                             $('#submitBtn').prop('disabled', true);
                         } else {
                             feedback.html('Email is available').addClass('text-success').removeClass('text-danger');
-                            $('#submitBtn').prop('disabled', false);
+                            checkFormValidity(); // Check form validity
                         }
                     });
                 }, 500);
+            } else if (email) {
+                feedback.html('Please enter a valid Gmail address').addClass('text-danger').removeClass('text-success');
+                $('#submitBtn').prop('disabled', true);
+            } else {
+                feedback.html('');
+                $('#submitBtn').prop('disabled', true);
+            }
+        });
+
+        // Add live password validation
+        $('#password').on('input', function() {
+            const password = $(this).val();
+            const feedback = $(this).next('.password-feedback');
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+            
+            // Create feedback element if it doesn't exist
+            if (!feedback.length) {
+                $(this).after('<small class="form-text password-feedback"></small>');
+            }
+            
+            if (password) {
+                if (passwordRegex.test(password)) {
+                    $(this).next('.password-feedback').html('Password meets requirements')
+                        .addClass('text-success').removeClass('text-danger');
+                    checkFormValidity(); // Check form validity
+                } else {
+                    $(this).next('.password-feedback').html('Password must be at least 8 characters and include uppercase, lowercase, and numbers')
+                        .addClass('text-danger').removeClass('text-success');
+                    $('#submitBtn').prop('disabled', true);
+                }
+            } else {
+                $(this).next('.password-feedback').html('');
+            }
+            
+            // Trigger confirm password validation if it has a value
+            if ($('#confirm_password').val()) {
+                $('#confirm_password').trigger('input');
+            }
+        });
+
+        // Update confirm password validation
+        $('#confirm_password').on('input', function() {
+            const password = $('#password').val();
+            const confirmPassword = $(this).val();
+            const feedback = $('#passwordMatch');
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+            
+            if (confirmPassword) {
+                if (password === confirmPassword && passwordRegex.test(password)) {
+                    feedback.html('Passwords match').addClass('text-success').removeClass('text-danger');
+                    checkFormValidity(); // Check form validity
+                } else {
+                    feedback.html('Passwords do not match or do not meet requirements')
+                        .addClass('text-danger').removeClass('text-success');
+                    $('#submitBtn').prop('disabled', true);
+                }
             } else {
                 feedback.html('');
             }
         });
 
-        $('#confirm_password').on('input', function() {
-            const password = $('#password').val();
-            const confirmPassword = $(this).val();
-            const feedback = $('#passwordMatch');
-            
-            if (password === confirmPassword) {
-                feedback.html('Passwords match').addClass('text-success').removeClass('text-danger');
-                $('#submitBtn').prop('disabled', false);
-            } else {
-                feedback.html('Passwords do not match').addClass('text-danger').removeClass('text-success');
-                $('#submitBtn').prop('disabled', true);
-            }
-        });
+        // Function to check overall form validity
+        function checkFormValidity() {
+            const emailValid = $('#emailFeedback').hasClass('text-success');
+            const passwordValid = $('#password').next('.password-feedback').hasClass('text-success');
+            const confirmPasswordValid = $('#passwordMatch').hasClass('text-success');
+            $('#submitBtn').prop('disabled', !(emailValid && passwordValid && confirmPasswordValid));
+        }
     });
 
     function validateForm() {
@@ -194,9 +244,9 @@ if (!$result) {
             return false;
         }
         
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
         if (!passwordRegex.test(password)) {
-            alert('Password must be at least 8 characters and include uppercase, lowercase, number and special character');
+            alert('Password must be at least 8 characters and include uppercase, lowercase, and numbers');
             return false;
         }
         

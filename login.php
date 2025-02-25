@@ -19,7 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['form_type']) && $_POST
     $email = $conn->real_escape_string($_POST['email']);
     $password = $_POST['password'];
     
-    $sql = "SELECT * FROM users WHERE email = ?";
+    $sql = "SELECT * FROM users WHERE email = ? AND status = 'active'";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -49,7 +49,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['form_type']) && $_POST
             $signinErrors['password'] = "Invalid password";
         }
     } else {
-        $signinErrors['email'] = "Email not found";
+        $signinErrors['email'] = "Email not found or account is inactive";
     }
     $stmt->close();
 }
@@ -594,8 +594,8 @@ $conn->close();
           message: 'Name must be 2-50 characters and contain only letters, spaces, and hyphens'
         },
         email: {
-          pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-          message: 'Please enter a valid email address'
+          pattern: /^[a-zA-Z0-9._%+-]+@gmail\.com$/,
+          message: 'Please enter a valid Gmail address (must end with @gmail.com)'
         },
         phone: {
           pattern: /^[6-9]\d{9}$/,

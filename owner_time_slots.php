@@ -22,40 +22,47 @@ $cleanup_sql = "DELETE FROM turf_time_slots WHERE date < CURRENT_DATE";
 $conn->query($cleanup_sql);
 
 // Handle adding slot to turf_time_slots
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['slot_id'])) {
-    $slot_id = $_POST['slot_id'];
-    $turf_id = 1; // Assuming single turf
-    $date = date('Y-m-d'); // Current date
-    $owner_id = $_SESSION['user_id']; // Get the owner's ID
-    
-    // Check if slot already exists for this date
-    $check_sql = "SELECT id FROM turf_time_slots 
-                  WHERE turf_id = ? AND slot_id = ? AND date = ?";
-    $check_stmt = $conn->prepare($check_sql);
-    $check_stmt->bind_param("iis", $turf_id, $slot_id, $date);
-    $check_stmt->execute();
-    $check_result = $check_stmt->get_result();
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['slot_id'])) {
+        $slot_id = $_POST['slot_id'];
+        $turf_id = 1; // Assuming single turf
+        $date = isset($_POST['selected_date']) ? $_POST['selected_date'] : date('Y-m-d');
+        $owner_id = $_SESSION['user_id'];
+        
+        // Check if slot already exists for this date
+        $check_sql = "SELECT id FROM turf_time_slots 
+                      WHERE turf_id = ? AND slot_id = ? AND date = ?";
+        $check_stmt = $conn->prepare($check_sql);
+        $check_stmt->bind_param("iis", $turf_id, $slot_id, $date);
+        $check_stmt->execute();
+        $check_result = $check_stmt->get_result();
 
-    // Only insert if slot doesn't exist
-    if ($check_result->num_rows === 0) {
-        $sql = "INSERT INTO turf_time_slots (turf_id, slot_id, date, is_available, is_owner_reserved, booked_by, booking_status) 
-                VALUES (?, ?, ?, 0, 1, ?, 'Reserved by Owner')";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iisi", $turf_id, $slot_id, $date, $owner_id);
-        $stmt->execute();
+        if ($check_result->num_rows === 0) {
+            $sql = "INSERT INTO turf_time_slots (turf_id, slot_id, date, is_available, is_owner_reserved, booked_by, booking_status) 
+                    VALUES (?, ?, ?, 0, 1, ?, 'Reserved by Owner')";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("iisi", $turf_id, $slot_id, $date, $owner_id);
+            $stmt->execute();
+        }
     }
 }
 
-// Fetch available fixed time slots (not in turf_time_slots for current date)
+// Get selected date (default to current date if not set)
+$selected_date = isset($_GET['date']) ? $_GET['date'] : date('Y-m-d');
+
+// Fetch available fixed time slots
 $sql = "SELECT fts.* 
         FROM fixed_time_slots fts
         LEFT JOIN turf_time_slots tts ON fts.id = tts.slot_id 
-            AND tts.date = CURRENT_DATE
+            AND tts.date = ?
         WHERE tts.id IS NULL
         ORDER BY fts.start_time";
-$result = $conn->query($sql);
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $selected_date);
+$stmt->execute();
+$result = $stmt->get_result();
 
-// Fetch reserved time slots for current date only
+// Fetch reserved time slots for selected date
 $reserved_sql = "SELECT 
     fts.start_time, 
     fts.end_time, 
@@ -66,9 +73,12 @@ $reserved_sql = "SELECT
 FROM turf_time_slots tts
 JOIN fixed_time_slots fts ON tts.slot_id = fts.id
 LEFT JOIN users u ON tts.booked_by = u.id
-WHERE tts.date = CURRENT_DATE
+WHERE tts.date = ?
 ORDER BY fts.start_time";
-$reserved_result = $conn->query($reserved_sql);
+$reserved_stmt = $conn->prepare($reserved_sql);
+$reserved_stmt->bind_param("s", $selected_date);
+$reserved_stmt->execute();
+$reserved_result = $reserved_stmt->get_result();
 ?>
 
 <!DOCTYPE html>
@@ -334,6 +344,19 @@ $reserved_result = $conn->query($reserved_sql);
                 </div>
             </div>
 
+            <!-- Add this after the header div and before the time-slots-container -->
+            <div class="date-selector" style="margin-bottom: 20px;">
+                <form method="GET" id="dateForm">
+                    <label for="date">Select Date:</label>
+                    <input type="date" 
+                           id="date" 
+                           name="date" 
+                           value="<?php echo $selected_date; ?>" 
+                           min="<?php echo date('Y-m-d'); ?>" 
+                           onchange="this.form.submit()">
+                </form>
+            </div>
+
             <?php if (isset($_GET['success'])): ?>
             <div class="success-message" style="display: block;">
                 Time slots have been successfully generated!
@@ -359,6 +382,7 @@ $reserved_result = $conn->query($reserved_sql);
                             <td>
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="slot_id" value="<?php echo $row['id']; ?>">
+                                    <input type="hidden" name="selected_date" value="<?php echo $selected_date; ?>">
                                     <button type="submit" class="add-btn">
                                         <i class="fas fa-plus"></i>
                                         Add to Schedule

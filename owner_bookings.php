@@ -45,19 +45,126 @@ $result = $conn->query($sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking Details - SOCCER-11</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: #f0f2f5; 
-            padding: 20px; 
-            max-width: 1200px; 
-            margin: 0 auto;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
         }
+
+        body { 
+            background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+            margin: 0;
+        }
+        
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 30px;
+        }
+        
         .container {
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .admin-sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+            padding: 25px;
+            position: fixed;
+            height: 100vh;
+            box-shadow: 4px 0 25px rgba(76,175,80,0.2);
+        }
+        .logo {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo i {
+            font-size: 28px;
+            color: #A5D6A7;
+            text-shadow: 0 0 15px rgba(165,214,167,0.4);
+        }
+        .logo h2 {
+            font-size: 20px;
+            color: white;
+            margin: 0;
+        }
+        .menu-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .menu-items a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 8px;
+            background: linear-gradient(to right, transparent 0%, #ffffff 100%);
+            background-size: 200% 100%;
+            background-position: left bottom;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+        .menu-items a:hover {
+            background-position: right bottom;
+            transform: translateX(12px);
+            box-shadow: 0 6px 20px rgba(76,175,80,0.25);
+            color: #2E7D32;
+        }
+        .menu-items a.active {
+            background: white;
+            color: #2E7D32;
+            box-shadow: 0 6px 20px rgba(76,175,80,0.25);
+        }
+        .menu-items i {
+            width: 20px;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .menu-items a:hover i {
+            transform: scale(1.2) rotate(5deg);
+            color: #2E7D32;
+        }
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 80px;
+                padding: 15px;
+            }
+            .logo h2,
+            .menu-items span {
+                display: none;
+            }
+            .menu-items a {
+                padding: 15px;
+                justify-content: center;
+            }
+            .menu-items i {
+                margin: 0;
+            }
+            .main-content {
+                margin-left: 80px;
+                padding: 20px;
+            }
         }
         h2 {
             color: #2c3e50;
@@ -106,51 +213,93 @@ $result = $conn->query($sql);
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="owner.php" class="back-btn">← Back to Dashboard</a>
-        <h2>Booking Details</h2>
+    <div class="dashboard">
+        <!-- New Sidebar HTML -->
+        <div class="admin-sidebar">
+            <div class="logo">
+                <i class="fas fa-futbol"></i>
+                <h2>SOCCER-11</h2>
+            </div>
+            <ul class="menu-items">
+                <li>
+                    <a href="owner.php">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_bookings.php" class="active">
+                        <i class="fas fa-calendar"></i>
+                        <span>Bookings</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_customer.php">
+                        <i class="fas fa-users"></i>
+                        <span>Customers</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_time_slots.php">
+                        <i class="fas fa-clock"></i>
+                        <span>Time Slots</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_settings.php">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
 
-        <div class="container mt-4">
-            <h2>Pending Bookings</h2>
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Customer</th>
-                            <th>Phone</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php while ($booking = $result->fetch_assoc()): ?>
-                            <tr>
-                                <td><?php echo date('d M Y', strtotime($booking['date'])); ?></td>
-                                <td><?php echo date('h:i A', strtotime($booking['start_time'])) . ' - ' . 
-                                           date('h:i A', strtotime($booking['end_time'])); ?></td>
-                                <td><?php echo htmlspecialchars($booking['user_name']); ?></td>
-                                <td><?php echo htmlspecialchars($booking['user_phone']); ?></td>
-                                <td>
-                                    <button class="btn btn-success btn-sm confirm-booking" 
-                                            data-booking-id="<?php echo $booking['id']; ?>" 
-                                            data-action="confirm">
-                                        Confirm
-                                    </button>
-                                    <button class="btn btn-danger btn-sm reject-booking" 
-                                            data-booking-id="<?php echo $booking['id']; ?>" 
-                                            data-action="reject">
-                                        Reject
-                                    </button>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="container">
+                <h2>Booking Details</h2>
+                <div class="container mt-4">
+                    <h2>Pending Bookings</h2>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Customer</th>
+                                    <th>Phone</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php while ($booking = $result->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?php echo date('d M Y', strtotime($booking['date'])); ?></td>
+                                        <td><?php echo date('h:i A', strtotime($booking['start_time'])) . ' - ' . 
+                                                   date('h:i A', strtotime($booking['end_time'])); ?></td>
+                                        <td><?php echo htmlspecialchars($booking['user_name']); ?></td>
+                                        <td><?php echo htmlspecialchars($booking['user_phone']); ?></td>
+                                        <td>
+                                            <button class="btn btn-success btn-sm confirm-booking" 
+                                                    data-booking-id="<?php echo $booking['id']; ?>" 
+                                                    data-action="confirm">
+                                                Confirm
+                                            </button>
+                                            <button class="btn btn-danger btn-sm reject-booking" 
+                                                    data-booking-id="<?php echo $booking['id']; ?>" 
+                                                    data-action="reject">
+                                                Reject
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const handleBookingAction = async (bookingId, action) => {

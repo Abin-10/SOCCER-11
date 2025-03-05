@@ -73,8 +73,19 @@ $admin_name = $_SESSION['user_name'];
     <meta charset="utf-8">
     <title>SOCCER-11 Admin - Bookings</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    
-    <!-- Include your existing CSS links here -->
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet"> 
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link href="css/style.css" rel="stylesheet">
     
     <style>
         :root {
@@ -343,25 +354,78 @@ $admin_name = $_SESSION['user_name'];
             justify-content: space-between; /* Space between title and button */
             align-items: center; /* Center items vertically */
         }
+
+        .admin-sidebar {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 20px;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .admin-nav-link {
+            color: #333;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        
+        .admin-nav-link:hover {
+            background: #e9ecef;
+            text-decoration: none;
+        }
+        
+        .admin-nav-link.active {
+            background: rgb(24, 137, 32);
+            color: #fff;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Include your existing navbar here -->
+    <!-- Nav Start -->
+    <nav class="navbar navbar-expand-md bg-light navbar-light">
+        <a href="#" class="navbar-brand">SOCCER-11 ADMIN</a>
+        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-user-circle mr-2"></i> <?php echo htmlspecialchars($admin_name); ?>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="adminDropdown">
+                        <a class="dropdown-item" href="admin-profile.php"><i class="fas fa-user mr-2"></i> Profile</a>
+                        <a class="dropdown-item" href="settings.php"><i class="fas fa-cog mr-2"></i> Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- Nav End -->
 
     <div class="container-fluid">
         <div class="row">
-            <!-- Include your existing sidebar here -->
-            
+            <!-- Sidebar -->
+            <div class="col-md-2 admin-sidebar">
+                <h4 class="mb-4">Dashboard</h4>
+                <a href="admin.php" class="admin-nav-link"><i class="fas fa-home mr-2"></i>Overview</a>
+                <a href="booking.php" class="admin-nav-link active"><i class="fas fa-calendar-alt mr-2"></i>Bookings</a>
+                <a href="users.php" class="admin-nav-link"><i class="fas fa-users mr-2"></i>Users</a>
+                <a href="turfs.php" class="admin-nav-link"><i class="fas fa-football-ball mr-2"></i>Turfs</a>
+                <a href="admin_fixed_slots.php" class="admin-nav-link"><i class="fas fa-clock mr-2"></i>Manage Slots</a>
+                <a href="settings.php" class="admin-nav-link"><i class="fas fa-cog mr-2"></i>Settings</a>
+            </div>
+
             <!-- Main Content -->
             <div class="col-md-10 admin-content">
                 <div class="header">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h1>Booking Management</h1>
-                        <a href="admin.php" class="back-btn small-back-btn">
-                            <i class="fas fa-arrow-left"></i>
-                            Back to Dashboard
-                        </a>
                     </div>
                 </div>
                 
@@ -434,7 +498,12 @@ $admin_name = $_SESSION['user_name'];
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Initialize Dropdown -->
     <script>
+        $(document).ready(function() {
+            $('.dropdown-toggle').dropdown();
+        });
+        
         function editBooking(id) {
             // Implement edit functionality
             alert('Edit booking ' + id);

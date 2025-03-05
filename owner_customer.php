@@ -34,71 +34,242 @@ if (!$result) {
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,800" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+        }
+
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .admin-sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+            padding: 25px;
+            position: fixed;
+            height: 100vh;
+            box-shadow: 4px 0 25px rgba(76,175,80,0.2);
+        }
+
+        .logo {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 28px;
+            color: #A5D6A7;
+            text-shadow: 0 0 15px rgba(165,214,167,0.4);
+        }
+
+        .logo h2 {
+            font-size: 20px;
+            color: white;
+            margin: 0;
+        }
+
+        .menu-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-items a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 8px;
+            background: linear-gradient(to right, transparent 0%, #ffffff 100%);
+            background-size: 200% 100%;
+            background-position: left bottom;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .menu-items a:hover {
+            background-position: right bottom;
+            transform: translateX(12px);
+            box-shadow: 0 6px 20px rgba(76,175,80,0.25);
+            color: #2E7D32;
+        }
+
+        .menu-items a.active {
+            background: white;
+            color: #2E7D32;
+            box-shadow: 0 6px 20px rgba(76,175,80,0.25);
+        }
+
+        .menu-items i {
+            width: 20px;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .menu-items a:hover i {
+            transform: scale(1.2) rotate(5deg);
+            color: #2E7D32;
+        }
+
+        /* Responsive Design for Sidebar */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 80px;
+                padding: 15px;
+            }
+
+            .logo h2,
+            .menu-items span {
+                display: none;
+            }
+
+            .menu-items a {
+                padding: 15px;
+                justify-content: center;
+            }
+
+            .menu-items i {
+                margin: 0;
+            }
+
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 30px;
+        }
+    </style>
 </head>
 <body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="admin-sidebar">
+            <div class="logo">
+                <i class="fas fa-futbol"></i>
+                <h2>SOCCER-11</h2>
+            </div>
+            <ul class="menu-items">
+                <li>
+                    <a href="owner.php">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_bookings.php">
+                        <i class="fas fa-calendar"></i>
+                        <span>Bookings</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_customer.php" class="active">
+                        <i class="fas fa-users"></i>
+                        <span>Customers</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_time_slots.php">
+                        <i class="fas fa-clock"></i>
+                        <span>Time Slots</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_settings.php">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
 
-    <div class="container mt-5">
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-danger">
-                <?= htmlspecialchars($_SESSION['error']) ?>
-                <?php unset($_SESSION['error']); ?>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="container mt-5">
+                <?php if (isset($_SESSION['error'])): ?>
+                    <div class="alert alert-danger">
+                        <?= htmlspecialchars($_SESSION['error']) ?>
+                        <?php unset($_SESSION['error']); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (isset($_SESSION['success'])): ?>
+                    <div class="alert alert-success">
+                        <?= htmlspecialchars($_SESSION['success']) ?>
+                        <?php unset($_SESSION['success']); ?>
+                    </div>
+                <?php endif; ?>
+                <h2>Customers List</h2>
+                <button class="btn btn-success mb-3" data-toggle="modal" data-target="#addCustomerModal">
+                    <i class="fas fa-user-plus"></i> Add Customer
+                </button>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><?= $row['id'] ?></td>
+                                <td><?= htmlspecialchars($row['name']) ?></td>
+                                <td><?= htmlspecialchars($row['email']) ?></td>
+                                <td><?= htmlspecialchars($row['phone']) ?></td>
+                                <td>
+                                    <?php 
+                                        echo htmlspecialchars($row['status']) === 'active' ? 'Active' : 'Inactive';
+                                    ?>
+                                </td>
+                                <td>
+                                    <?php if ($row['status'] === 'active'): ?>
+                                        <a href="toggle_customer_status.php?id=<?= $row['id'] ?>&action=deactivate" 
+                                           class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Are you sure you want to deactivate this user?')">
+                                            <i class="fas fa-user-times"></i> Deactivate
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="toggle_customer_status.php?id=<?= $row['id'] ?>&action=activate" 
+                                           class="btn btn-success btn-sm"
+                                           onclick="return confirm('Are you sure you want to activate this user?')">
+                                            <i class="fas fa-user-check"></i> Activate
+                                        </a>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
             </div>
-        <?php endif; ?>
-        
-        <?php if (isset($_SESSION['success'])): ?>
-            <div class="alert alert-success">
-                <?= htmlspecialchars($_SESSION['success']) ?>
-                <?php unset($_SESSION['success']); ?>
-            </div>
-        <?php endif; ?>
-        <h2>Customers List</h2>
-        <button class="btn btn-success mb-3" data-toggle="modal" data-target="#addCustomerModal">
-            <i class="fas fa-user-plus"></i> Add Customer
-        </button>
-        <a href="owner.php" class="btn btn-success float-right mb-3">Back to Dashboard</a>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td><?= $row['id'] ?></td>
-                        <td><?= htmlspecialchars($row['name']) ?></td>
-                        <td><?= htmlspecialchars($row['email']) ?></td>
-                        <td><?= htmlspecialchars($row['phone']) ?></td>
-                        <td>
-                            <?php 
-                                echo "Raw status: " . $row['status'] . "<br>";
-                                echo htmlspecialchars($row['status']) === 'active' ? 'Active' : 'Inactive';
-                            ?>
-                        </td>
-                        <td>
-                            <?php if ($row['status'] === 'active'): ?>
-                                <a href="toggle_customer_status.php?id=<?= $row['id'] ?>&action=deactivate" 
-                                   class="btn btn-danger btn-sm"
-                                   onclick="return confirm('Are you sure you want to deactivate this user?')">
-                                    <i class="fas fa-user-times"></i> Deactivate
-                                </a>
-                            <?php else: ?>
-                                <a href="toggle_customer_status.php?id=<?= $row['id'] ?>&action=activate" 
-                                   class="btn btn-success btn-sm"
-                                   onclick="return confirm('Are you sure you want to activate this user?')">
-                                    <i class="fas fa-user-check"></i> Activate
-                                </a>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+        </div>
     </div>
 
     <!-- Add Customer Modal -->

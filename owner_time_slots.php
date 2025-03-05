@@ -106,8 +106,8 @@ $reserved_result = $reserved_stmt->get_result();
             min-height: 100vh;
         }
 
-        /* Sidebar Styles */
-        .sidebar {
+        /* Remove old sidebar styles and add new ones */
+        .admin-sidebar {
             width: 280px;
             background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
             color: white;
@@ -118,43 +118,91 @@ $reserved_result = $reserved_stmt->get_result();
         }
 
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
             padding: 15px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .logo i {
             font-size: 28px;
             color: #A5D6A7;
+            text-shadow: 0 0 15px rgba(165,214,167,0.4);
+        }
+
+        .logo h2 {
+            font-size: 20px;
+            color: white;
+            margin: 0;
         }
 
         .menu-items {
             list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
         .menu-items a {
-            color: white;
+            color: rgba(255,255,255,0.9);
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 15px;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            transition: all 0.3s ease;
+            padding: 16px 20px;
+            border-radius: 12px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 8px;
+            background: linear-gradient(to right, transparent 0%, #ffffff 100%);
+            background-size: 200% 100%;
+            background-position: left bottom;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
         }
 
         .menu-items a:hover {
-            background: rgba(255,255,255,0.1);
-            transform: translateX(5px);
+            background-position: right bottom;
+            transform: translateX(12px);
+            box-shadow: 0 6px 20px rgba(76,175,80,0.25);
+            color: #2E7D32;
         }
 
         .menu-items a.active {
             background: white;
-            color: #4CAF50;
+            color: #2E7D32;
+            box-shadow: 0 6px 20px rgba(76,175,80,0.25);
+        }
+
+        .menu-items i {
+            width: 20px;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .menu-items a:hover i {
+            transform: scale(1.2) rotate(5deg);
+            color: #2E7D32;
+        }
+
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 80px;
+                padding: 15px;
+            }
+
+            .logo h2,
+            .menu-items span {
+                display: none;
+            }
+
+            .menu-items a {
+                padding: 15px;
+                justify-content: center;
+            }
+
+            .menu-items i {
+                margin: 0;
+            }
         }
 
         /* Main Content Styles */
@@ -297,37 +345,47 @@ $reserved_result = $reserved_stmt->get_result();
             background: #ffebee;
             color: #c62828;
         }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-                padding: 15px;
-            }
-
-            .logo h2, .menu-items span {
-                display: none;
-            }
-
-            .main-content {
-                margin-left: 70px;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="dashboard">
-        <!-- Sidebar -->
-        <div class="sidebar">
+        <!-- Replace old sidebar with new one -->
+        <div class="admin-sidebar">
             <div class="logo">
                 <i class="fas fa-futbol"></i>
                 <h2>SOCCER-11</h2>
             </div>
             <ul class="menu-items">
-                <li><a href="owner.php"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
-                <li><a href="owner_bookings.php"><i class="fas fa-calendar"></i><span>Bookings</span></a></li>
-                <li><a href="owner_customer.php"><i class="fas fa-users"></i><span>Customers</span></a></li>
-                <li><a href="owner_time_slots.php" class="active"><i class="fas fa-clock"></i><span>Time Slots</span></a></li>
-                <li><a href="owner_settings.php"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+                <li>
+                    <a href="owner.php">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_bookings.php">
+                        <i class="fas fa-calendar"></i>
+                        <span>Bookings</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_customer.php">
+                        <i class="fas fa-users"></i>
+                        <span>Customers</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_time_slots.php" class="active">
+                        <i class="fas fa-clock"></i>
+                        <span>Time Slots</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="owner_settings.php">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
             </ul>
         </div>
 

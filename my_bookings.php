@@ -38,6 +38,13 @@ $stmt->execute();
 $result = $stmt->get_result();
 ?>
 
+<style>
+.fade-out {
+    transition: opacity 0.5s ease;
+    opacity: 0;
+}
+</style>
+
 <div class="container mt-4">
     <h2>My Bookings</h2>
     
@@ -52,7 +59,8 @@ $result = $stmt->get_result();
             </select>
         </div>
         <div class="col-md-3">
-            <input type="text" class="form-control" id="dateFilter" placeholder="Select Date">
+            <!-- Removed the date filter input -->
+            <!-- <input type="text" class="form-control" id="dateFilter" placeholder="Select Date"> -->
         </div>
     </div>
 
@@ -140,23 +148,12 @@ $result = $stmt->get_result();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize date picker
-    if (typeof flatpickr !== 'undefined') {
-        flatpickr("#dateFilter", {
-            dateFormat: "Y-m-d",
-            onChange: function(selectedDates, dateStr) {
-                filterBookings();
-            }
-        });
-    }
-
     // Status filter change handler
     document.getElementById('statusFilter').addEventListener('change', filterBookings);
 
     // Filter bookings function
     function filterBookings() {
         const status = document.getElementById('statusFilter').value;
-        const date = document.getElementById('dateFilter').value;
         const rows = document.querySelectorAll('tbody tr');
 
         rows.forEach(row => {
@@ -166,12 +163,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (status) {
                 const rowStatus = row.querySelector('td:nth-child(4) .badge').textContent.trim().toLowerCase();
                 if (rowStatus !== status.toLowerCase()) showRow = false;
-            }
-
-            // Date filter
-            if (date) {
-                const rowDate = row.querySelector('td:nth-child(2)').getAttribute('data-date');
-                if (rowDate !== date) showRow = false;
             }
 
             row.style.display = showRow ? '' : 'none';
@@ -188,33 +179,46 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    document.getElementById('confirmCancel').addEventListener('click', function() {
+    document.getElementById('confirmCancel').addEventListener('click', async function() {
         if (!bookingToCancel) return;
 
-        fetch('cancel_booking.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                booking_id: bookingToCancel
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
+        try {
+            const response = await fetch('cancel_booking.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    booking_id: bookingToCancel
+                })
+            });
+
+            const data = await response.json();
+            
             if (data.success) {
-                location.reload();
+                // Update the row status dynamically instead of reloading
+                const row = document.querySelector(`button[data-booking-id="${bookingToCancel}"]`).closest('tr');
+                const statusCell = row.querySelector('td:nth-child(4)');
+                statusCell.innerHTML = '<span class="badge badge-danger">Cancelled</span>';
+                
+                // Add animation class
+                row.classList.add('fade-out');
+                
+                // Remove the cancel button
+                row.querySelector('.cancel-booking').remove();
+                
+                // Show success message
+                alert('Booking cancelled successfully');
             } else {
                 alert(data.message || 'Failed to cancel booking');
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error:', error);
             alert('Failed to cancel booking');
-        })
-        .finally(() => {
+        } finally {
             $('#cancelBookingModal').modal('hide');
-        });
+            bookingToCancel = null;
+        }
     });
 });
 </script>

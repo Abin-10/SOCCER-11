@@ -61,6 +61,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error_message = "Invalid phone number format!";
     } elseif (!validateEmail($email)) {
         $error_message = "Invalid email format!";
+    } elseif ($name === $user['name'] && $email === $user['email'] && $phone === $user['phone']) {
+        // Check if the submitted values are the same as the current values
+        $error_message = "No changes were made!";
     } else {
         $update_sql = "UPDATE users SET name = ?, email = ?, phone = ? WHERE id = ?";
         $update_stmt = $conn->prepare($update_sql);
@@ -176,7 +179,7 @@ $conn->close();
         }
 
         .profile-header {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            background: linear-gradient(135deg, #4caf50, #81c784);
             padding: 70px 50px;
             border-radius: 30px;
             margin-bottom: 40px;
@@ -281,13 +284,14 @@ $conn->close();
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            background: linear-gradient(135deg, #4caf50, #81c784);
             border: none;
             color: white;
             box-shadow: 0 8px 15px rgba(21, 128, 61, 0.2);
         }
 
         .btn-primary:hover {
+            background: #388e3c;
             transform: translateY(-3px);
             box-shadow: 0 12px 20px rgba(21, 128, 61, 0.3);
         }
@@ -353,7 +357,7 @@ $conn->close();
         }
 
         .alert {
-            border-radius: 20px;
+            border-radius: 10px;
             padding: 20px 30px;
             margin-bottom: 30px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
@@ -383,82 +387,158 @@ $conn->close();
                 padding: 30px;
             }
         }
+
+        /* Sidebar Styles */
+        .admin-sidebar {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 20px;
+            border-right: 1px solid #dee2e6;
+            margin-top: 20px;
+        }
+
+        .admin-nav-link {
+            color: #333;
+            padding: 10px 15px;
+            display: block;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            transition: background 0.3s;
+        }
+
+        .admin-nav-link:hover {
+            background: #e9ecef;
+            text-decoration: none;
+        }
+
+        .admin-nav-link.active {
+            background: rgb(24, 137, 32);
+            color: #fff;
+        }
+
+        /* Main Content Styles */
+        .admin-content {
+            padding: 20px;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #4caf50, #81c784);
+            padding: 70px 50px;
+            border-radius: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 40px rgba(21, 128, 61, 0.15);
+            color: white;
+        }
+
+        .profile-header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .alert {
+            border-radius: 10px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="profile-container">
-            <div class="profile-header">
-                <h1 class="display-4 mb-2">Welcome, <?php echo htmlspecialchars($user['name']); ?>!</h1>
-                <p class="lead mb-0">Manage your profile and view your bookings</p>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 admin-sidebar" style="margin-top: 20px;">
+                <h4 class="mb-4">Dashboard</h4>
+                <a href="userdashboard.php" class="admin-nav-link"><i class="fas fa-home mr-2"></i>Overview</a>
+                <a href="book_turf.php" class="admin-nav-link"><i class="fas fa-calendar-alt mr-2"></i>Book Turf</a>
+                <a href="my_bookings.php" class="admin-nav-link"><i class="fas fa-list mr-2"></i>My Bookings</a>
+                <a href="contact.php" class="admin-nav-link"><i class="fas fa-envelope mr-2"></i>Contact</a>
+                <a href="profile.php" class="admin-nav-link active"><i class="fas fa-user mr-2"></i>Profile</a>
             </div>
 
-            <?php if (isset($success_message)): ?>
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i>
-                    <?php echo $success_message; ?>
-                </div>
-            <?php endif; ?>
+            <!-- Main Content -->
+            <div class="col-md-10 admin-content">
+                <div class="profile-container">
+                    <div class="profile-header">
+                        <h1 class="display-4 mb-2">Welcome, <?php echo htmlspecialchars($user['name']); ?>!</h1>
+                        <p class="lead mb-0">Manage your profile and view your bookings</p>
+                    </div>
 
-            <?php if (isset($error_message)): ?>
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <?php echo $error_message; ?>
-                </div>
-            <?php endif; ?>
+                    <?php if (isset($success_message)): ?>
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <?php echo $success_message; ?>
+                        </div>
+                    <?php endif; ?>
 
-            <div class="profile-content">
-                <div class="profile-form">
-                    <h3 class="mb-4">Personal Information</h3>
-                    <form method="POST" action="">
-                        <div class="form-group">
-                            <label for="name"><i class="fas fa-user mr-2"></i>Full Name</label>
-                            <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($user['name']); ?>" required>
+                    <?php if (isset($error_message)): ?>
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <?php echo $error_message; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="profile-content">
+                        <div class="profile-form">
+                            <h3 class="mb-4">Personal Information</h3>
+                            <form method="POST" action="">
+                                <div class="form-group">
+                                    <label for="name"><i class="fas fa-user mr-2"></i>Full Name</label>
+                                    <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($user['name']); ?>" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="email"><i class="fas fa-envelope mr-2"></i>Email</label>
+                                    <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="phone"><i class="fas fa-phone mr-2"></i>Phone Number</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone']); ?>" required>
+                                </div>
+
+                                <div class="d-flex">
+                                    <button type="submit" class="btn btn-primary mr-3">
+                                        <i class="fas fa-save mr-2"></i>Update Profile
+                                    </button>
+                                    <a href="userdashboard.php" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left mr-2"></i>Back
+                                    </a>
+                                </div>
+                            </form>
                         </div>
 
-                        <div class="form-group">
-                            <label for="email"><i class="fas fa-envelope mr-2"></i>Email</label>
-                            <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($user['email']); ?>" required>
-                        </div>
+                        <div class="profile-form">
+                            <h3 class="mb-4">Reset Password</h3>
+                            <form method="POST" action="">
+                                <div class="form-group">
+                                    <label for="current_password">Current Password</label>
+                                    <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                </div>
 
-                        <div class="form-group">
-                            <label for="phone"><i class="fas fa-phone mr-2"></i>Phone Number</label>
-                            <input type="tel" class="form-control" id="phone" name="phone" value="<?php echo htmlspecialchars($user['phone']); ?>" required>
-                        </div>
+                                <div class="form-group">
+                                    <label for="new_password">New Password</label>
+                                    <input type="password" class="form-control" id="new_password" name="new_password" required>
+                                </div>
 
-                        <div class="d-flex">
-                            <button type="submit" class="btn btn-primary mr-3">
-                                <i class="fas fa-save mr-2"></i>Update Profile
-                            </button>
-                            <a href="userdashboard.php" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left mr-2"></i>Back
-                            </a>
-                        </div>
-                    </form>
-                </div>
+                                <div class="form-group">
+                                    <label for="confirm_password">Confirm New Password</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                </div>
 
-                <div class="profile-form">
-                    <h3 class="mb-4">Reset Password</h3>
-                    <form method="POST" action="">
-                        <div class="form-group">
-                            <label for="current_password">Current Password</label>
-                            <input type="password" class="form-control" id="current_password" name="current_password" required>
+                                <button type="submit" name="reset_password" class="btn btn-primary">
+                                    <i class="fas fa-lock mr-2"></i>Reset Password
+                                </button>
+                            </form>
                         </div>
-
-                        <div class="form-group">
-                            <label for="new_password">New Password</label>
-                            <input type="password" class="form-control" id="new_password" name="new_password" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="confirm_password">Confirm New Password</label>
-                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                        </div>
-
-                        <button type="submit" name="reset_password" class="btn btn-primary">
-                            <i class="fas fa-lock mr-2"></i>Reset Password
-                        </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

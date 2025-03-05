@@ -13,6 +13,11 @@ $turf_sql = "SELECT t.turf_id, t.name, t.location, t.hourly_rate, t.owner_id
              WHERE t.turf_id = 1 LIMIT 1";  // You might want to make this dynamic based on the selected turf
 $turf_result = $conn->query($turf_sql);
 $turf = $turf_result->fetch_assoc();
+
+// Fetch all turfs for selection
+$turf_sql = "SELECT turf_id, name FROM turf"; 
+$turf_list_result = $conn->query($turf_sql);
+$turf_list = $turf_list_result->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <h3 class="mb-4">Book Your Turf</h3>
@@ -31,6 +36,19 @@ $turf = $turf_result->fetch_assoc();
             <form id="booking-form" action="process_booking.php" method="POST">
                 <input type="hidden" name="turf_id" value="<?php echo $turf['turf_id']; ?>">
                 
+                <!-- Add turf selection dropdown -->
+                <div class="form-group">
+                    <label for="turf-select">Select Turf</label>
+                    <select id="turf-select" name="turf_id" class="form-control" required>
+                        <option value="">Choose a turf</option>
+                        <?php foreach ($turf_list as $turf_option): ?>
+                            <option value="<?php echo $turf_option['turf_id']; ?>">
+                                <?php echo htmlspecialchars($turf_option['name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="date">Select Date</label>
                     <input type="date" id="date" name="date" class="form-control" 
@@ -80,6 +98,34 @@ $turf = $turf_result->fetch_assoc();
 </div>
 
 <script>
+document.getElementById('turf-select').addEventListener('change', function() {
+    const turfId = this.value;
+    const date = document.getElementById('date').value;
+    
+    // Fetch and update turf details
+    if (turfId) {
+        fetch(`get_turf_details.php?turf_id=${turfId}`)
+            .then(response => response.json())
+            .then(turf => {
+                // Update the turf card details
+                document.querySelector('.turf-card-body h5').textContent = turf.name;
+                document.querySelector('.turf-card-body p:nth-of-type(1)').textContent = turf.location;
+                document.querySelector('.price').textContent = `₹${turf.hourly_rate} per hour`;
+                
+                // Update hidden input
+                document.querySelector('input[name="turf_id"]').value = turf.turf_id;
+                
+                // Fetch available slots if date is selected
+                if (date) {
+                    fetchAvailableSlots(date, turfId);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching turf details:', error);
+            });
+    }
+});
+
 document.getElementById('date').addEventListener('change', function() {
     const date = this.value;
     const turfId = <?php echo $turf['turf_id']; ?>;

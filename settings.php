@@ -101,16 +101,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $new_password = trim($_POST['new_password']);
     $confirm_password = trim($_POST['confirm_password']);
 
-    if (!empty($name) && !empty($email) && !empty($phone)) {
+    // Check if any changes were made
+    if ($name === $user['name'] && $email === $user['email'] && 
+        $phone === $user['phone'] && empty($new_password) && 
+        empty($confirm_password)) {
+        // Check which button was clicked
+        if (isset($_POST['update_password'])) {
+            $password_error = "No changes were made.";
+        } else {
+            $info_error = "No changes were made.";
+        }
+    } else if (!empty($name) && !empty($email) && !empty($phone)) {
         // Validate email if it's a Gmail address
         $email_errors = validateEmail($email);
         if (!empty($email_errors)) {
-            $error_msg = "Email validation failed:<br>" . implode("<br>", $email_errors);
+            $info_error = "Email validation failed:<br>" . implode("<br>", $email_errors);
         } else {
             // Validate phone number
             $phone_errors = validatePhoneNumber($phone);
             if (!empty($phone_errors)) {
-                $error_msg = "Phone number requirements not met:<br>" . implode("<br>", $phone_errors);
+                $info_error = "Phone number requirements not met:<br>" . implode("<br>", $phone_errors);
             } else {
                 // If password fields are filled, validate and update password
                 if (!empty($new_password) || !empty($confirm_password)) {
@@ -124,16 +134,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt->close();
 
                     if (empty($current_password)) {
-                        $error_msg = "Current password is required to change password!";
+                        $password_error = "Current password is required to change password!";
                     } elseif (!password_verify($current_password, $user_data['password'])) {
-                        $error_msg = "Current password is incorrect!";
+                        $password_error = "Current password is incorrect!";
                     } elseif ($new_password !== $confirm_password) {
-                        $error_msg = "New passwords do not match!";
+                        $password_error = "New passwords do not match!";
                     } else {
                         // Validate new password
                         $password_errors = validatePassword($new_password);
                         if (!empty($password_errors)) {
-                            $error_msg = "Password requirements not met:<br>" . implode("<br>", $password_errors);
+                            $password_error = "Password requirements not met:<br>" . implode("<br>", $password_errors);
                         } else {
                             $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
                             $update_sql = "UPDATE users SET name = ?, email = ?, phone = ?, password = ? WHERE id = ?";
@@ -148,13 +158,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $stmt->bind_param("sssi", $name, $email, $phone, $user_id);
                 }
 
-                if (!isset($error_msg) && isset($stmt) && $stmt->execute()) {
-                    $_SESSION['success_msg'] = "Settings updated successfully!";
+                if (!isset($info_error) && !isset($password_error) && isset($stmt) && $stmt->execute()) {
+                    $_SESSION['info_success'] = "Personal information updated successfully!";
+                    if (!empty($new_password)) {
+                        $_SESSION['password_success'] = "Password updated successfully!";
+                    }
                     $_SESSION['user_name'] = $name; // Update session name
                     header("Location: settings.php");
                     exit();
-                } elseif (!isset($error_msg)) {
-                    $error_msg = "Error updating settings.";
+                } elseif (!isset($info_error) && !isset($password_error)) {
+                    $info_error = "Error updating settings.";
                 }
                 if (isset($stmt)) {
                     $stmt->close();
@@ -162,7 +175,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     } else {
-        $error_msg = "Name, email, and phone fields are required!";
+        $info_error = "Name, email, and phone fields are required!";
     }
 }
 
@@ -282,41 +295,79 @@ $conn->close();
             <div class="settings-card">
                 <form method="POST">
                     <div class="row">
-                        <!-- Left Column - Personal Info -->
+                        <!-- Personal Information Card -->
                         <div class="col-md-6">
-                            <h4 class="mb-4">Personal Information</h4>
-                            <div class="form-group">
-                                <label>Name</label>
-                                <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($user['name']); ?>" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($user['email']); ?>" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Phone</label>
-                                <input type="tel" name="phone" class="form-control" value="<?php echo htmlspecialchars($user['phone']); ?>" required>
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h4 class="mb-4">Personal Information</h4>
+                                    <?php if (isset($_SESSION['info_success'])): ?>
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle mr-2"></i>
+                                            <?php echo $_SESSION['info_success']; unset($_SESSION['info_success']); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (isset($info_error)): ?>
+                                        <div class="alert alert-danger">
+                                            <i class="fas fa-exclamation-circle mr-2"></i>
+                                            <?php echo $info_error; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="form-group">
+                                        <label>Name</label>
+                                        <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($user['name']); ?>" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($user['email']); ?>" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Phone</label>
+                                        <input type="tel" name="phone" class="form-control" value="<?php echo htmlspecialchars($user['phone']); ?>" required>
+                                    </div>
+                                    <div class="mt-4">
+                                        <button type="submit" name="update_info" class="btn btn-primary">Update Information</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Right Column - Password Change -->
+                        <!-- Change Password Card -->
                         <div class="col-md-6">
-                            <h4 class="mb-4">Change Password</h4>
-                            <div class="form-group">
-                                <label>Current Password</label>
-                                <input type="password" name="current_password" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label>New Password</label>
-                                <input type="password" name="new_password" class="form-control">
-                                <small class="form-text text-muted">
-                                    Password must contain at least 8 characters, including uppercase, lowercase, 
-                                    and numbers.
-                                </small>
-                            </div>
-                            <div class="form-group">
-                                <label>Confirm New Password</label>
-                                <input type="password" name="confirm_password" class="form-control">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h4 class="mb-4">Change Password</h4>
+                                    <?php if (isset($_SESSION['password_success'])): ?>
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle mr-2"></i>
+                                            <?php echo $_SESSION['password_success']; unset($_SESSION['password_success']); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (isset($password_error)): ?>
+                                        <div class="alert alert-danger">
+                                            <i class="fas fa-exclamation-circle mr-2"></i>
+                                            <?php echo $password_error; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="form-group">
+                                        <label>Current Password</label>
+                                        <input type="password" name="current_password" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>New Password</label>
+                                        <input type="password" name="new_password" class="form-control">
+                                        <small class="form-text text-muted">
+                                            Password must contain at least 8 characters, including uppercase, lowercase, 
+                                            and numbers.
+                                        </small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Confirm New Password</label>
+                                        <input type="password" name="confirm_password" class="form-control">
+                                    </div>
+                                    <div class="mt-4">
+                                        <button type="submit" name="update_password" class="btn btn-primary">Update Password</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -327,10 +378,6 @@ $conn->close();
                             <?php echo $error_msg; ?>
                         </div>
                     <?php endif; ?>
-
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </div>
                 </form>
             </div>
         </div>

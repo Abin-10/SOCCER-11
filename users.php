@@ -29,29 +29,27 @@ $result = $conn->query("SELECT id, name, email, phone, role, status FROM users")
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Lato', sans-serif;
             background: #f8f9fd;
         }
         
         .navbar {
-            background: rgb(24, 137, 32) !important;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            background: #f8f9fa !important;
             padding: 1rem 2rem;
         }
         
         .navbar-brand, .nav-link {
-            color: white !important;
+            color: #333 !important;
         }
         
         .admin-sidebar {
-            background: white;
+            background: #f8f9fa;
             min-height: 100vh;
-            padding: 30px;
-            border-right: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 2px 0 15px rgba(0,0,0,0.05);
+            padding: 20px;
+            border-right: 1px solid #dee2e6;
         }
         
         .admin-content {
@@ -60,31 +58,25 @@ $result = $conn->query("SELECT id, name, email, phone, role, status FROM users")
         
         .admin-nav-link {
             color: #333;
-            padding: 12px 20px;
+            padding: 10px 15px;
             display: block;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            transition: all 0.3s ease;
-            font-weight: 500;
+            border-radius: 4px;
+            margin-bottom: 5px;
         }
         
         .admin-nav-link:hover {
-            background: rgba(24, 137, 32, 0.1);
-            color: rgb(24, 137, 32);
+            background: #e9ecef;
             text-decoration: none;
-            transform: translateX(5px);
         }
         
         .admin-nav-link.active {
             background: rgb(24, 137, 32);
             color: #fff;
-            box-shadow: 0 4px 15px rgba(24, 137, 32, 0.2);
         }
         
         h2, h4 {
-            font-family: 'Playfair Display', serif;
-            font-weight: 600;
-            color: rgb(24, 137, 32);
+            font-family: 'Oswald', sans-serif;
+            color: #333;
         }
         
         .table {
@@ -95,8 +87,8 @@ $result = $conn->query("SELECT id, name, email, phone, role, status FROM users")
         }
         
         .table thead {
-            background: rgb(24, 137, 32);
-            color: white;
+            background: #f8f9fa;
+            color: #333;
         }
         
         .table th {
@@ -145,17 +137,17 @@ $result = $conn->query("SELECT id, name, email, phone, role, status FROM users")
         }
         
         .modal-header {
-            background: rgb(24, 137, 32);
-            color: white;
+            background: #f8f9fa;
+            color: #333;
             border-radius: 15px 15px 0 0;
         }
         
         .modal-title {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Oswald', sans-serif;
         }
         
         .close {
-            color: white;
+            color: #333;
         }
         
         .dropdown-menu {

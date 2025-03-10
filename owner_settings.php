@@ -428,6 +428,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </a>
                 </li>
                 <li>
+                    <a href="owner_reviews.php">
+                        <i class="fas fa-star"></i>
+                        <span>Reviews</span>
+                    </a>
+                </li>
+                <li>
                     <a href="owner_settings.php" class="active">
                         <i class="fas fa-cog"></i>
                         <span>Settings</span>

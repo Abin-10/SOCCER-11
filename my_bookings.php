@@ -105,11 +105,20 @@ $result = $stmt->get_result();
                         <td>₹<?php echo number_format($booking['hourly_rate'], 2); ?></td>
                         <td><?php echo date('d M Y, h:i A', strtotime($booking['created_at'])); ?></td>
                         <td>
-                            <?php if ($booking['booking_status'] !== 'cancelled' && strtotime($booking['date']) > time()): ?>
-                                <button class="btn btn-sm btn-danger cancel-booking" 
-                                        data-booking-id="<?php echo $booking['id']; ?>">
-                                    Cancel
-                                </button>
+                            <?php if ($booking['booking_status'] !== 'cancelled'): ?>
+                                <?php if ($booking['booking_status'] === 'confirmed'): ?>
+                                    <?php if (strtotime($booking['date']) > time()): ?>
+                                        <button class="btn btn-sm btn-danger cancel-booking" 
+                                                data-booking-id="<?php echo $booking['id']; ?>">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                    <?php endif; ?>
+                                <?php elseif ($booking['booking_status'] === 'pending'): ?>
+                                    <button class="btn btn-sm btn-danger cancel-booking" 
+                                            data-booking-id="<?php echo $booking['id']; ?>">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -196,13 +205,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             
             if (data.success) {
-                // Update the row status dynamically instead of reloading
+                // Update the row status without fading out
                 const row = document.querySelector(`button[data-booking-id="${bookingToCancel}"]`).closest('tr');
                 const statusCell = row.querySelector('td:nth-child(4)');
                 statusCell.innerHTML = '<span class="badge badge-danger">Cancelled</span>';
-                
-                // Add animation class
-                row.classList.add('fade-out');
                 
                 // Remove the cancel button
                 row.querySelector('.cancel-booking').remove();

@@ -137,8 +137,11 @@ $user_name = $_SESSION['user_name'];
                     <a href="my_bookings.php" class="admin-nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'my_bookings.php' ? 'active' : ''; ?>">
                         <i class="fas fa-list mr-2"></i>My Bookings
                     </a>
+                    <a href="notifications.php" class="admin-nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'notifications.php' ? 'active' : ''; ?>">
+                        <i class="fas fa-bell mr-2"></i>Notifications
+                    </a>
                     <a href="contact.php" class="admin-nav-link <?php echo basename($_SERVER['PHP_SELF']) == 'contact.php' ? 'active' : ''; ?>">
-                        <i class="fas fa-envelope mr-2"></i>Contact
+                        <i class="fas fa-envelope mr-2"></i>Reviews
                     </a>
                 </div>
                 <!-- Main Content -->

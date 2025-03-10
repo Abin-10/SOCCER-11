@@ -365,11 +365,18 @@ $total_users = $users_result->fetch_assoc()['total_users'];
                     </a>
                 </li>
                 <li>
+                    <a href="owner_reviews.php">
+                        <i class="fas fa-star"></i>
+                        <span>Reviews</span>
+                    </a>
+                </li>
+                <li>
                     <a href="owner_settings.php">
                         <i class="fas fa-cog"></i>
                         <span>Settings</span>
                     </a>
                 </li>
+                
             </ul>
         </div>
 

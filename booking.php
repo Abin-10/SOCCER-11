@@ -10,6 +10,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
 // Database connection
 require_once 'db.php';
 
+// Add this function after database connection
+function convertTo12Hour($time) {
+    return date("g:i A", strtotime($time));
+}
+
 // Handle booking deletion
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete') {
     $booking_id = intval($_POST['booking_id']);
@@ -471,7 +476,7 @@ $admin_name = $_SESSION['user_name'];
                                 <?php while($row = mysqli_fetch_assoc($result)): ?>
                                     <tr>
                                         <td><?php echo htmlspecialchars($row['turf_name']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['start_time']) . ' - ' . htmlspecialchars($row['end_time']); ?></td>
+                                        <td><?php echo convertTo12Hour($row['start_time']) . ' - ' . convertTo12Hour($row['end_time']); ?></td>
                                         <td>
                                             <?php
                                             if ($row['is_available'] == 1) {

@@ -321,60 +321,127 @@ $avg_rating = number_format($avg_rating_result->fetch_assoc()['avg_rating'], 1);
         }
 
         .header {
-            text-align: center;
-            padding: 30px 0;
-            margin-bottom: 20px;
-            position: relative;
-            background: linear-gradient(135deg, rgba(76,175,80,0.1) 0%, rgba(46,125,50,0.1) 100%);
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-left: 280px;
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2em;
             color: #1B5E20;
             margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            animation: fadeInDown 0.8s ease-out;
         }
 
-        .user-info {
-            position: absolute;
-            top: 50%;
-            right: 30px;
-            transform: translateY(-50%);
+        /* Dropdown Container */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Dropdown Button */
+        .dropdown-btn {
+            background: linear-gradient(to right, #4CAF50 0%, #388E3C 100%);
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 20px;
-        }
-
-        .user-info span {
-            color: #2E7D32;
+            gap: 10px;
+            font-family: 'Montserrat', sans-serif;
             font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(76,175,80,0.2);
         }
 
-        .logout-btn {
-            padding: 8px 20px;
-            background: #dc3545;
-            color: white;
-            border-radius: 20px;
+        .dropdown-btn:hover {
+            background-position: right bottom;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76,175,80,0.3);
+        }
+
+        .dropdown-icon {
+            font-size: 12px;
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Dropdown Content */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 220px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Change rotation of dropdown icon when open */
+        .dropdown:hover .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+            color: #333;
+            padding: 14px 20px;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
 
-        .logout-btn:hover {
-            background: white;
-            color: #dc3545;
-            border-color: #dc3545;
-            transform: translateY(-2px);
+        .dropdown-content a:last-child {
+            border-bottom: none;
         }
 
-        /* Add animations */
-        @keyframes fadeInDown {
+        .dropdown-content a i {
+            width: 20px;
+            color: #4CAF50;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(76,175,80,0.1);
+            transform: translateX(5px);
+        }
+
+        /* Special styling for logout item */
+        .dropdown-content a.logout-item {
+            color: #E53E3E;
+        }
+
+        .dropdown-content a.logout-item i {
+            color: #E53E3E;
+        }
+
+        .dropdown-content a.logout-item:hover {
+            background-color: rgba(229,62,62,0.1);
+        }
+
+        /* Animation for dropdown */
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: translateY(-10px);
             }
             to {
                 opacity: 1;
@@ -382,25 +449,23 @@ $avg_rating = number_format($avg_rating_result->fetch_assoc()['avg_rating'], 1);
             }
         }
 
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive adjustments */
+        /* Responsive Design */
         @media (max-width: 768px) {
+            .dropdown-btn span {
+                display: none;
+            }
+            
+            .dropdown-btn {
+                padding: 12px;
+            }
+            
+            .dropdown-content {
+                right: -50px;
+            }
+            
             .header {
                 margin-left: 80px;
-                padding: 20px 0;
-            }
-
-            .user-info {
-                position: static;
-                justify-content: center;
-                margin-top: 15px;
-                transform: none;
+                padding: 20px;
             }
         }
 
@@ -547,9 +612,22 @@ $avg_rating = number_format($avg_rating_result->fetch_assoc()['avg_rating'], 1);
         <div class="main-content">
             <div class="header">
                 <h1>Reviews Management</h1>
-                <div class="user-info">
-                    <span>Welcome, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                    <a href="logout.php" class="logout-btn">Logout</a>
+                <div class="dropdown">
+                    <button class="dropdown-btn">
+                        <i class="fas fa-user-circle"></i>
+                        <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                        <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="owner_settings.php">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a href="logout.php" class="logout-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
                 </div>
             </div>
 

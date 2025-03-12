@@ -17,6 +17,11 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Add this function after the database connection
+function convertTo12Hour($time) {
+    return date("g:i A", strtotime($time));
+}
+
 // Clean up past dates from turf_time_slots
 $cleanup_sql = "DELETE FROM turf_time_slots WHERE date < CURRENT_DATE";
 $conn->query($cleanup_sql);
@@ -212,15 +217,16 @@ $reserved_result = $reserved_stmt->get_result();
             padding: 30px;
         }
 
+        /* Updated Header and Dropdown Styles */
         .header {
             background: white;
             padding: 20px 30px;
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
         }
 
         .header h1 {
@@ -228,35 +234,130 @@ $reserved_result = $reserved_stmt->get_result();
             font-size: 24px;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+        /* Dropdown Container */
+        .dropdown {
+            position: relative;
+            display: inline-block;
         }
 
-        .user-name {
-            color: #2E7D32;
-            font-weight: 600;
-        }
-
-        .logout-btn {
-            background: linear-gradient(135deg, #ff4b4b 0%, #ff416c 100%);
+        /* Dropdown Button */
+        .dropdown-btn {
+            background: linear-gradient(to right, #4CAF50 0%, #388E3C 100%);
             color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            padding: 14px 20px;
             border: none;
+            border-radius: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(76,175,80,0.2);
         }
 
-        .logout-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255,75,75,0.3);
+        .dropdown-btn:hover {
+            background-position: right bottom;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76,175,80,0.3);
+        }
+
+        .dropdown-icon {
+            font-size: 12px;
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Dropdown Content */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 220px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Change rotation of dropdown icon when open */
+        .dropdown:hover .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+            color: #333;
+            padding: 14px 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a i {
+            width: 20px;
+            color: #4CAF50;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(76,175,80,0.1);
+            transform: translateX(5px);
+        }
+
+        /* Special styling for logout item */
+        .dropdown-content a.logout-item {
+            color: #E53E3E;
+        }
+
+        .dropdown-content a.logout-item i {
+            color: #E53E3E;
+        }
+
+        .dropdown-content a.logout-item:hover {
+            background-color: rgba(229,62,62,0.1);
+        }
+
+        /* Animation for dropdown */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dropdown-btn span {
+                display: none;
+            }
+            
+            .dropdown-btn {
+                padding: 12px;
+            }
+            
+            .dropdown-content {
+                right: -50px;
+            }
         }
 
         .time-slots-container {
@@ -399,12 +500,22 @@ $reserved_result = $reserved_stmt->get_result();
         <div class="main-content">
             <div class="header">
                 <h1>Time Slots Management</h1>
-                <div class="user-info">
-                    <span class="user-name">Welcome, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                    <a href="logout.php" class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Logout
-                    </a>
+                <div class="dropdown">
+                    <button class="dropdown-btn">
+                        <i class="fas fa-user-circle"></i>
+                        <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                        <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="owner_settings.php">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a href="logout.php" class="logout-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -441,8 +552,8 @@ $reserved_result = $reserved_stmt->get_result();
                     <tbody>
                         <?php while($row = $result->fetch_assoc()): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($row['start_time']); ?></td>
-                            <td><?php echo htmlspecialchars($row['end_time']); ?></td>
+                            <td><?php echo convertTo12Hour($row['start_time']); ?></td>
+                            <td><?php echo convertTo12Hour($row['end_time']); ?></td>
                             <td>
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="slot_id" value="<?php echo $row['id']; ?>">
@@ -473,8 +584,8 @@ $reserved_result = $reserved_stmt->get_result();
                     <tbody>
                         <?php while($reserved = $reserved_result->fetch_assoc()): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($reserved['start_time']); ?></td>
-                            <td><?php echo htmlspecialchars($reserved['end_time']); ?></td>
+                            <td><?php echo convertTo12Hour($reserved['start_time']); ?></td>
+                            <td><?php echo convertTo12Hour($reserved['end_time']); ?></td>
                             <td>
                                 <?php if ($reserved['is_available']): ?>
                                     <span class="status available">Available</span>

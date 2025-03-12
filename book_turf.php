@@ -132,6 +132,27 @@ document.getElementById('date').addEventListener('change', function() {
     fetchAvailableSlots(date, turfId);
 });
 
+function formatTo12Hour(time) {
+    // Split the time into hours and minutes
+    const [hours, minutes] = time.split(':');
+    
+    // Convert to 12-hour format
+    let period = 'AM';
+    let hour = parseInt(hours);
+    
+    if (hour >= 12) {
+        period = 'PM';
+        if (hour > 12) {
+            hour -= 12;
+        }
+    }
+    if (hour === 0) {
+        hour = 12;
+    }
+    
+    return `${hour}:${minutes} ${period}`;
+}
+
 function fetchAvailableSlots(date, turfId) {
     const timeSlotSelect = document.getElementById('time-slot');
     timeSlotSelect.innerHTML = '<option value="">Loading slots...</option>';
@@ -179,7 +200,10 @@ function fetchAvailableSlots(date, turfId) {
                         id: slot.id,
                         booking_id: slot.slot_booking_id
                     });
-                    option.textContent = `${slot.start_time} - ${slot.end_time}`;
+                    // Convert times to 12-hour format
+                    const startTime12 = formatTo12Hour(slot.start_time);
+                    const endTime12 = formatTo12Hour(slot.end_time);
+                    option.textContent = `${startTime12} - ${endTime12}`;
                     timeSlotSelect.appendChild(option);
                     availableSlots++;
                 }

@@ -348,50 +348,211 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             border: 1px solid #FFCDD2;
         }
 
+        /* Updated Header and Dropdown Styles */
         .header {
-            padding-left: 40px;  /* Add padding to match the settings-container */
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Dropdown Container */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Dropdown Button */
+        .dropdown-btn {
+            background: linear-gradient(to right, #4CAF50 0%, #388E3C 100%);
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(76,175,80,0.2);
+        }
+
+        .dropdown-btn:hover {
+            background-position: right bottom;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76,175,80,0.3);
+        }
+
+        .dropdown-icon {
+            font-size: 12px;
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Dropdown Content */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 220px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Change rotation of dropdown icon when open */
+        .dropdown:hover .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+            color: #333;
+            padding: 14px 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a i {
+            width: 20px;
+            color: #4CAF50;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(76,175,80,0.1);
+            transform: translateX(5px);
+        }
+
+        /* Special styling for logout item */
+        .dropdown-content a.logout-item {
+            color: #E53E3E;
+        }
+
+        .dropdown-content a.logout-item i {
+            color: #E53E3E;
+        }
+
+        .dropdown-content a.logout-item:hover {
+            background-color: rgba(229,62,62,0.1);
+        }
+
+        /* Animation for dropdown */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dropdown-btn span {
+                display: none;
+            }
+            
+            .dropdown-btn {
+                padding: 12px;
+            }
+            
+            .dropdown-content {
+                right: -50px;
+            }
+        }
+
+        /* Add these animation styles to your existing CSS */
+        .settings-card form {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, opacity 0.3s ease-out;
+            opacity: 0;
+        }
+
+        .settings-card form.show {
+            max-height: 800px; /* Adjust this value based on your form's maximum height */
+            opacity: 1;
         }
 
         .toggle-btn {
-            background: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
-        .toggle-btn:hover {
-            background: #388E3C;
+        .toggle-btn:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
         }
 
-        .cancel-btn {
-            background: #f44336;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 14px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
+        .toggle-btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
         }
 
-        .cancel-btn:hover {
-            background: #d32f2f;
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
         }
 
-        form {
-            margin-top: 20px;
+        .toggle-btn i {
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-btn.active i {
+            transform: rotate(180deg);
+        }
+
+        .settings-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .settings-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -445,6 +606,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="main-content">
             <div class="header">
                 <h1>Profile Settings</h1>
+                <div class="dropdown">
+                    <button class="dropdown-btn">
+                        <i class="fas fa-user-circle"></i>
+                        <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                        <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="owner_settings.php">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a href="logout.php" class="logout-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <?php if (isset($_SESSION['message'])): ?>
@@ -522,7 +700,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script>
     function toggleForm(formId) {
         const form = document.getElementById(formId);
-        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        const button = form.previousElementSibling; // Get the toggle button
+        const allForms = document.querySelectorAll('.settings-card form');
+        const allButtons = document.querySelectorAll('.toggle-btn');
+        
+        // Close all other forms first
+        allForms.forEach(otherForm => {
+            if (otherForm !== form && otherForm.classList.contains('show')) {
+                otherForm.classList.remove('show');
+                otherForm.style.display = 'none';
+                const otherButton = otherForm.previousElementSibling;
+                otherButton.classList.remove('active');
+            }
+        });
+
+        // Toggle the clicked form
+        if (form.style.display === 'none') {
+            form.style.display = 'block';
+            setTimeout(() => {
+                form.classList.add('show');
+                button.classList.add('active');
+            }, 10);
+
+            // Add ripple effect
+            const ripple = document.createElement('div');
+            ripple.classList.add('ripple');
+            button.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 1000);
+
+            // Scroll into view smoothly
+            form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            form.classList.remove('show');
+            button.classList.remove('active');
+            setTimeout(() => {
+                form.style.display = 'none';
+            }, 500); // Match this with the CSS transition duration
+        }
     }
 
     document.addEventListener('DOMContentLoaded', function() {

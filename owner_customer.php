@@ -162,6 +162,154 @@ if (!$result) {
             margin-left: 280px;
             padding: 30px;
         }
+
+        /* Updated Header and Dropdown Styles */
+        .page-header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Dropdown Container */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Dropdown Button */
+        .dropdown-btn {
+            background: linear-gradient(to right, #4CAF50 0%, #388E3C 100%);
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 5px 15px rgba(76,175,80,0.2);
+        }
+
+        .dropdown-btn:hover {
+            background-position: right bottom;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76,175,80,0.3);
+        }
+
+        .dropdown-icon {
+            font-size: 12px;
+            margin-left: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Dropdown Content */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 220px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Change rotation of dropdown icon when open */
+        .dropdown:hover .dropdown-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+            color: #333;
+            padding: 14px 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .dropdown-content a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-content a i {
+            width: 20px;
+            color: #4CAF50;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(76,175,80,0.1);
+            transform: translateX(5px);
+        }
+
+        /* Special styling for logout item */
+        .dropdown-content a.logout-item {
+            color: #E53E3E;
+        }
+
+        .dropdown-content a.logout-item i {
+            color: #E53E3E;
+        }
+
+        .dropdown-content a.logout-item:hover {
+            background-color: rgba(229,62,62,0.1);
+        }
+
+        /* Animation for dropdown */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dropdown-btn span {
+                display: none;
+            }
+            
+            .dropdown-btn {
+                padding: 12px;
+            }
+            
+            .dropdown-content {
+                right: -50px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -214,7 +362,28 @@ if (!$result) {
 
         <!-- Main Content -->
         <div class="main-content">
-            <div class="container mt-5">
+            <div class="page-header">
+                <h2><i class="fas fa-users mr-2"></i>Customer Management</h2>
+                <div class="dropdown">
+                    <button class="dropdown-btn">
+                        <i class="fas fa-user-circle"></i>
+                        <span><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                        <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <a href="owner_settings.php">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a href="logout.php" class="logout-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
                 <?php if (isset($_SESSION['error'])): ?>
                     <div class="alert alert-danger">
                         <?= htmlspecialchars($_SESSION['error']) ?>

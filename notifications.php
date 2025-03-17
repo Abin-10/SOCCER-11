@@ -38,6 +38,7 @@ $user_name = $_SESSION['user_name'];
                 min-height: 100vh;
                 padding: 20px;
                 border-right: 1px solid #dee2e6;
+                box-shadow: 2px 0 10px rgba(0,0,0,0.05);
             }
             
             .admin-content {
@@ -62,24 +63,67 @@ $user_name = $_SESSION['user_name'];
                 color: #fff;
             }
 
-            /* Additional styles for notifications */
+            /* Enhanced styles for notifications */
             .notification-item {
-                padding: 15px;
-                border-bottom: 1px solid #dee2e6;
-                transition: background-color 0.3s;
+                padding: 20px;
+                border-bottom: 1px solid #eee;
+                transition: all 0.3s ease;
+                position: relative;
+                cursor: pointer;
             }
 
             .notification-item:hover {
                 background-color: #f8f9fa;
+                transform: translateX(5px);
             }
 
             .notification-item.unread {
                 background-color: #e8f4ff;
+                border-left: 4px solid #007bff;
+            }
+
+            .notification-item.unread:hover {
+                background-color: #d8ebff;
             }
 
             .notification-time {
                 color: #6c757d;
                 font-size: 0.85rem;
+                font-weight: 500;
+            }
+
+            .card {
+                border: none;
+                border-radius: 15px;
+                box-shadow: 0 0 20px rgba(0,0,0,0.05);
+                overflow: hidden;
+            }
+
+            .card-body {
+                padding: 0;
+            }
+
+            /* Animation for new notifications */
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+
+            .notification-item {
+                animation: fadeIn 0.5s ease-out;
+            }
+
+            /* Empty state styling */
+            .no-notifications {
+                padding: 40px 20px;
+                text-align: center;
+                color: #6c757d;
+            }
+
+            .no-notifications i {
+                font-size: 48px;
+                margin-bottom: 15px;
+                color: #dee2e6;
             }
         </style>
     </head>
@@ -123,16 +167,22 @@ $user_name = $_SESSION['user_name'];
 
                 <!-- Main Content -->
                 <div class="col-md-10 admin-content">
-                    <h2 class="mb-4">Notifications</h2>
+                    <h2 class="mb-4">
+                        <i class="fas fa-bell mr-2" style="color: #007bff;"></i>
+                        Notifications
+                    </h2>
                     
                     <div class="card">
-                        <div class="card-body p-0">
+                        <div class="card-body">
                             <?php
                             // Database connection
                             $conn = new mysqli("localhost", "root", "", "registration");
                             
                             if ($conn->connect_error) {
-                                echo "<p class='text-danger p-3'>Unable to fetch notifications</p>";
+                                echo "<div class='no-notifications'>";
+                                echo "<i class='fas fa-exclamation-circle'></i>";
+                                echo "<p class='text-danger'>Unable to fetch notifications</p>";
+                                echo "</div>";
                             } else {
                                 // Get notifications for the user
                                 $sql = "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC";
@@ -146,16 +196,27 @@ $user_name = $_SESSION['user_name'];
                                             $unreadClass = $row['is_read'] ? '' : 'unread';
                                             echo "<div class='notification-item {$unreadClass}'>";
                                             echo "<div class='d-flex justify-content-between align-items-center'>";
-                                            echo "<p class='mb-0'>" . htmlspecialchars($row['message']) . "</p>";
+                                            echo "<div class='notification-content'>";
+                                            if (!$row['is_read']) {
+                                                echo "<i class='fas fa-circle mr-2' style='color: #007bff; font-size: 8px;'></i>";
+                                            }
+                                            echo "<span>" . htmlspecialchars($row['message']) . "</span>";
+                                            echo "</div>";
                                             echo "<span class='notification-time'>" . date('M d, Y H:i', strtotime($row['created_at'])) . "</span>";
                                             echo "</div>";
                                             echo "</div>";
                                         }
                                     } else {
-                                        echo "<p class='text-center p-3'>No notifications found</p>";
+                                        echo "<div class='no-notifications'>";
+                                        echo "<i class='far fa-bell'></i>";
+                                        echo "<p>No notifications found</p>";
+                                        echo "</div>";
                                     }
                                 } else {
-                                    echo "<p class='text-danger p-3'>Error loading notifications</p>";
+                                    echo "<div class='no-notifications'>";
+                                    echo "<i class='fas fa-exclamation-circle'></i>";
+                                    echo "<p class='text-danger'>Error loading notifications</p>";
+                                    echo "</div>";
                                 }
                                 
                                 $stmt->close();

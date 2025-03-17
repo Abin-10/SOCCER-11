@@ -239,10 +239,14 @@ document.getElementById('booking-form').addEventListener('submit', function(e) {
     .then(async response => {
         const text = await response.text();
         try {
+            // Check if the response contains HTML error message
+            if (text.includes('Fatal error')) {
+                throw new Error('Server error occurred. Please try again.');
+            }
             return JSON.parse(text);
         } catch (e) {
             console.error('Raw response:', text);
-            throw new Error('Server returned invalid JSON. Check console for details.');
+            throw new Error('Server error occurred. Please try again.');
         }
     })
     .then(data => {

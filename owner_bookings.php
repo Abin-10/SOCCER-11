@@ -211,7 +211,7 @@ $recent_result = $conn->query($recent_sql);
         /* Stats Cards */
         .stats-row {
             display: grid;
-            grid-template-columns: minmax(250px, 400px);
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 25px;
             margin-bottom: 30px;
         }
@@ -232,6 +232,8 @@ $recent_result = $conn->query($recent_sql);
             font-size: 1.1rem;
             color: #666;
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
         }
 
         .stat-value {
@@ -678,6 +680,23 @@ $recent_result = $conn->query($recent_sql);
                 right: -50px;
             }
         }
+
+        .btn-success {
+            background-color: var(--success);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -756,6 +775,17 @@ $recent_result = $conn->query($recent_sql);
                     <h3><i class="fas fa-clock mr-2"></i>Pending Bookings</h3>
                     <div class="stat-value"><?php echo $pending_result->num_rows; ?></div>
                 </div>
+                <div class="stat-card">
+                    <h3><i class="fas fa-calendar-check mr-2"></i>Total Bookings</h3>
+                    <div class="stat-value"><?php echo $recent_result->num_rows; ?></div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3><i class="fas fa-calendar-check mr-2"></i>Booking Management</h3>
+                <button id="downloadBookings" class="btn btn-success">
+                    <i class="fas fa-download mr-2"></i>Download All Bookings
+                </button>
             </div>
 
             <!-- Table Container -->
@@ -995,6 +1025,10 @@ $recent_result = $conn->query($recent_sql);
             if (span) {
                 item.setAttribute('data-title', span.textContent);
             }
+        });
+
+        document.getElementById('downloadBookings').addEventListener('click', function() {
+            window.location.href = 'export_bookings.php';
         });
     });
     </script>

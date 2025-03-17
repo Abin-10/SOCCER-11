@@ -348,9 +348,6 @@ $slots = $conn->query("SELECT * FROM fixed_time_slots ORDER BY start_time ASC");
                 <div class="container">
                     <div class="header">
                         <h2>Manage Fixed Time Slots</h2>
-                        <a href="admin.php" class="back-btn">
-                            <i class="fas fa-arrow-left"></i> Back to Admin
-                        </a>
                     </div>
 
                     <?php if (isset($success_message)) { echo "<div class='success'>$success_message</div>"; } ?>

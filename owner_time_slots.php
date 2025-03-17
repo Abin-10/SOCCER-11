@@ -60,10 +60,17 @@ $sql = "SELECT fts.*
         FROM fixed_time_slots fts
         LEFT JOIN turf_time_slots tts ON fts.id = tts.slot_id 
             AND tts.date = ?
-        WHERE tts.id IS NULL
+        WHERE tts.id IS NULL 
+        AND (
+            DATE(?) > CURDATE() 
+            OR (
+                DATE(?) = CURDATE() 
+                AND fts.start_time > TIME(NOW())
+            )
+        )
         ORDER BY fts.start_time";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $selected_date);
+$stmt->bind_param("sss", $selected_date, $selected_date, $selected_date);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -550,7 +557,11 @@ $reserved_result = $reserved_stmt->get_result();
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while($row = $result->fetch_assoc()): ?>
+                        <?php 
+                        $hasAvailableSlots = false;
+                        while($row = $result->fetch_assoc()): 
+                            $hasAvailableSlots = true;
+                        ?>
                         <tr>
                             <td><?php echo convertTo12Hour($row['start_time']); ?></td>
                             <td><?php echo convertTo12Hour($row['end_time']); ?></td>
@@ -566,6 +577,11 @@ $reserved_result = $reserved_stmt->get_result();
                             </td>
                         </tr>
                         <?php endwhile; ?>
+                        <?php if (!$hasAvailableSlots): ?>
+                        <tr>
+                            <td colspan="3" class="text-center">No available time slots for this date</td>
+                        </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -618,6 +634,55 @@ $reserved_result = $reserved_stmt->get_result();
                     this.value = startDate.value;
                 }
             });
+        });
+
+        function updateTimeSlots() {
+            const currentDate = new Date();
+            const selectedDate = new Date(document.getElementById('date').value);
+            const timeSlotRows = document.querySelectorAll('.slots-table tbody tr');
+            
+            timeSlotRows.forEach(row => {
+                const startTimeCell = row.querySelector('td:first-child');
+                if (!startTimeCell) return;
+                
+                const startTime = convertTimeStringTo24Hour(startTimeCell.textContent.trim());
+                const [hours, minutes] = startTime.split(':');
+                
+                const slotDateTime = new Date(selectedDate);
+                slotDateTime.setHours(parseInt(hours), parseInt(minutes), 0);
+
+                // Hide expired slots
+                if (selectedDate.toDateString() === currentDate.toDateString() && slotDateTime < currentDate) {
+                    row.style.display = 'none';
+                } else {
+                    row.style.display = '';
+                }
+            });
+        }
+
+        function convertTimeStringTo24Hour(timeStr) {
+            const [time, period] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':');
+            hours = parseInt(hours);
+            
+            if (period === 'PM' && hours !== 12) {
+                hours += 12;
+            } else if (period === 'AM' && hours === 12) {
+                hours = 0;
+            }
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes}`;
+        }
+
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTimeSlots();
+            
+            // Update slots every minute
+            setInterval(updateTimeSlots, 60000);
+            
+            // Listen for date changes
+            document.getElementById('date').addEventListener('change', updateTimeSlots);
         });
     </script>
 </body>

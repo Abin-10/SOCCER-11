@@ -17,6 +17,19 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Add this function after the database connection
+function generateFormattedBookingId($original_id, $created_at) {
+    $date = new DateTime($created_at);
+    $year = $date->format('Y');
+    $month = $date->format('m');
+    
+    // Pad the ID with zeros to ensure at least 4 digits
+    $padded_id = str_pad($original_id, 4, '0', STR_PAD_LEFT);
+    
+    // Format: BK-YYYYMM-####
+    return "BK-{$year}{$month}-{$padded_id}";
+}
+
 // Fetch all bookings with detailed information
 $sql = "SELECT 
     tts.id as booking_id,
@@ -37,7 +50,7 @@ JOIN turf t ON tts.turf_id = t.turf_id
 JOIN fixed_time_slots fts ON tts.slot_id = fts.id
 LEFT JOIN users u ON tts.booked_by = u.id
 WHERE tts.booking_status IS NOT NULL
-ORDER BY tts.date DESC, fts.start_time ASC";
+ORDER BY tts.id ASC, tts.date DESC, fts.start_time ASC";
 
 $result = $conn->query($sql);
 
@@ -77,11 +90,15 @@ while ($row = $result->fetch_assoc()) {
     $end = strtotime($row['end_time']);
     $duration = ($end - $start) / 3600; // Convert seconds to hours
     
-    // Calculate total amount
-    $total_amount = $duration * $row['hourly_rate'];
+    // Calculate total amount (N/A for owner reservations)
+    $rate = $row['is_owner_reserved'] ? 'N/A' : $row['hourly_rate'];
+    $total_amount = $row['is_owner_reserved'] ? 'N/A' : ($duration * $row['hourly_rate']);
+    
+    // Generate formatted booking ID
+    $formatted_booking_id = generateFormattedBookingId($row['booking_id'], $row['created_at']);
     
     fputcsv($output, [
-        $row['booking_id'],
+        $formatted_booking_id,
         $row['turf_name'],
         $row['location'],
         $row['customer_name'] ?: 'N/A',
@@ -91,7 +108,7 @@ while ($row = $result->fetch_assoc()) {
         date('h:i A', strtotime($row['start_time'])),
         date('h:i A', strtotime($row['end_time'])),
         $duration,
-        $row['hourly_rate'],
+        $rate,
         $total_amount,
         ucfirst($row['booking_status']),
         $row['is_owner_reserved'] ? 'Yes' : 'No',

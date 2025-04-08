@@ -19,6 +19,45 @@ if (isset($_POST['check_email'])) {
     exit();
 }
 
+// Add this new function for sending status notification emails
+function sendStatusNotificationEmail($recipientEmail, $status) {
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'soccer097711@gmail.com';
+        $mail->Password   = 'ccax pvgw mmdn wttr';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+
+        $mail->setFrom('soccer097711@gmail.com', 'Soccer-11');
+        $mail->addAddress($recipientEmail);
+        
+        if ($status === 'active') {
+            $mail->Subject = 'Account Activated - Soccer-11';
+            $mail->Body    = "Dear User,\n\nYour account has been activated. You can now log in and access all features of Soccer-11.\n\nBest regards,\nSoccer-11 Team";
+        } else {
+            $mail->Subject = 'Account Deactivated - Soccer-11';
+            $mail->Body    = "Dear User,\n\nYour account has been deactivated. Please contact support if you believe this is an error.\n\nBest regards,\nSoccer-11 Team";
+        }
+
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        error_log("Email sending failed: " . $mail->ErrorInfo);
+        return false;
+    }
+}
+
+// Add the necessary PHPMailer includes at the top of the file
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require 'PHPMailer-master/src/Exception.php';
+require 'PHPMailer-master/src/PHPMailer.php';
+require 'PHPMailer-master/src/SMTP.php';
+
 // Fetch all customers
 $result = $conn->query("SELECT id, name, email, phone, status FROM users WHERE role = 'user'");
 if (!$result) {

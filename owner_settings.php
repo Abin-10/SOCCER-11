@@ -45,9 +45,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($name === $user_data['name'] && $email === $user_data['email'] && $phone === $user_data['phone']) {
             // No changes to profile
         }
-        // Validate Gmail address
-        elseif (!preg_match('/^[a-zA-Z0-9._%+-]+@gmail\.com$/', $email)) {
-            $_SESSION['error'][] = "Invalid email address! Only @gmail.com is allowed.";
+        // Basic email validation
+        elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['error'][] = "Please enter a valid email address.";
             $has_errors = true;
         } 
         // Validate phone number
@@ -751,8 +751,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Validation functions
         function validateEmail(email) {
-            const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-            return gmailRegex.test(email);
+            // Basic email validation regex
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
         }
 
         function validatePhone(phone) {
@@ -781,8 +782,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         emailInput.addEventListener('input', function() {
             const isValid = validateEmail(this.value);
             emailValidation.innerHTML = isValid ? 
-                '<span style="color: #28a745;">Valid Gmail address</span>' : 
-                '<span style="color: #dc3545;">Must be a valid Gmail address</span>';
+                '<span style="color: #28a745;">Valid email address</span>' : 
+                '<span style="color: #dc3545;">Must be a valid email address</span>';
             updateSubmitButton();
         });
 

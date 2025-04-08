@@ -22,7 +22,9 @@ if ($conn->connect_error) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $turf_name = $_POST['turf_name'];
     $location = $_POST['location'];
-    $hourly_rate = $_POST['hourly_rate'];
+    $morning_rate = $_POST['morning_rate'];
+    $afternoon_rate = $_POST['afternoon_rate'];
+    $evening_rate = $_POST['evening_rate'];
     $owner_id = $_POST['owner_id'];
     $error = false;
     $errors = array();
@@ -40,15 +42,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     $stmt->close();
 
-    // Add validation for positive hourly rate
-    if ($hourly_rate <= 0) {
+    // Add validation for positive rates
+    if ($morning_rate <= 0 || $afternoon_rate <= 0 || $evening_rate <= 0) {
         $error = true;
-        $errors['hourly_rate'] = 'Hourly rate must be greater than 0!';
+        $errors['rate'] = 'All rates must be greater than 0!';
     }
 
     if (!$error) {
-        $sql_insert = "INSERT INTO turf (name, location, hourly_rate, owner_id) 
-                       VALUES ('$turf_name', '$location', '$hourly_rate', '$owner_id')";
+        $sql_insert = "INSERT INTO turf (name, location, morning_rate, afternoon_rate, evening_rate, owner_id) 
+                       VALUES ('$turf_name', '$location', '$morning_rate', '$afternoon_rate', '$evening_rate', '$owner_id')";
         
         if ($conn->query($sql_insert) === TRUE) {
             echo "<script>
@@ -76,7 +78,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-$sql = "SELECT turf.turf_id, turf.name AS turf_name, turf.location, turf.hourly_rate, 
+$sql = "SELECT turf.turf_id, turf.name AS turf_name, turf.location, 
+               turf.morning_rate, turf.afternoon_rate, turf.evening_rate,
                users.name AS owner_name, users.email AS owner_email, users.phone AS owner_phone
         FROM turf
         INNER JOIN users ON turf.owner_id = users.id";
@@ -356,10 +359,24 @@ $result = $conn->query($sql);
                             </div>
 
                             <div class="form-group">
-                                <label>Hourly Rate:</label>
-                                <input type="number" name="hourly_rate" step="0.01" required placeholder="Enter hourly rate"
-                                       value="<?php echo isset($_POST['hourly_rate']) ? htmlspecialchars($_POST['hourly_rate']) : ''; ?>">
-                                <?php if (isset($errors['hourly_rate'])) echo "<div class='error-message'>{$errors['hourly_rate']}</div>"; ?>
+                                <label>Morning Rate (6:01 AM - 10:00 AM):</label>
+                                <input type="number" name="morning_rate" step="0.01" required placeholder="Enter morning rate"
+                                       value="<?php echo isset($_POST['morning_rate']) ? htmlspecialchars($_POST['morning_rate']) : ''; ?>">
+                                <?php if (isset($errors['morning_rate'])) echo "<div class='error-message'>{$errors['morning_rate']}</div>"; ?>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Afternoon Rate (10:01 AM - 4:00 PM):</label>
+                                <input type="number" name="afternoon_rate" step="0.01" required placeholder="Enter afternoon rate"
+                                       value="<?php echo isset($_POST['afternoon_rate']) ? htmlspecialchars($_POST['afternoon_rate']) : ''; ?>">
+                                <?php if (isset($errors['afternoon_rate'])) echo "<div class='error-message'>{$errors['afternoon_rate']}</div>"; ?>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Evening Rate (4:01 PM - 11:00 PM):</label>
+                                <input type="number" name="evening_rate" step="0.01" required placeholder="Enter evening rate"
+                                       value="<?php echo isset($_POST['evening_rate']) ? htmlspecialchars($_POST['evening_rate']) : ''; ?>">
+                                <?php if (isset($errors['evening_rate'])) echo "<div class='error-message'>{$errors['evening_rate']}</div>"; ?>
                             </div>
 
                             <div class="form-group">
@@ -390,7 +407,9 @@ $result = $conn->query($sql);
                                 <th>Turf ID</th>
                                 <th>Turf Name</th>
                                 <th>Location</th>
-                                <th>Hourly Rate</th>
+                                <th>Morning Rate (6:01-10:00)</th>
+                                <th>Afternoon Rate (10:01-16:00)</th>
+                                <th>Evening Rate (16:01-23:00)</th>
                                 <th>Owner Name</th>
                                 <th>Owner Email</th>
                                 <th>Owner Phone</th>
@@ -402,7 +421,9 @@ $result = $conn->query($sql);
                                             <td>" . $row["turf_id"] . "</td>
                                             <td>" . $row["turf_name"] . "</td>
                                             <td>" . $row["location"] . "</td>
-                                            <td>₹" . $row["hourly_rate"] . "</td>
+                                            <td>₹" . $row["morning_rate"] . "</td>
+                                            <td>₹" . $row["afternoon_rate"] . "</td>
+                                            <td>₹" . $row["evening_rate"] . "</td>
                                             <td>" . $row["owner_name"] . "</td>
                                             <td>" . $row["owner_email"] . "</td>
                                             <td>" . $row["owner_phone"] . "</td>

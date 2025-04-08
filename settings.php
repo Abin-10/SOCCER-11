@@ -81,12 +81,9 @@ function validatePhoneNumber($phone) {
 function validateEmail($email) {
     $errors = [];
     
-    // Check if it's a Gmail address
-    if (strpos($email, '@gmail.com') !== false) {
-        // Verify it's exactly @gmail.com at the end
-        if (!preg_match('/^[a-zA-Z0-9._%+-]+@gmail\.com$/', $email)) {
-            $errors[] = "Invalid Gmail format. Only @gmail.com is allowed";
-        }
+    // Basic email validation using filter_var
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Please enter a valid email address";
     }
     
     return $errors;

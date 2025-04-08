@@ -23,8 +23,28 @@ function convertTo12Hour($time) {
 }
 
 // Clean up past dates from turf_time_slots
-$cleanup_sql = "DELETE FROM turf_time_slots WHERE date < CURRENT_DATE";
-$conn->query($cleanup_sql);
+try {
+    $conn->begin_transaction();
+
+    // Delete related booking details first
+    $cleanup_booking_details = "DELETE FROM booking_details 
+                              WHERE booking_id IN (
+                                  SELECT id 
+                                  FROM turf_time_slots 
+                                  WHERE date < CURRENT_DATE
+                              )";
+    $conn->query($cleanup_booking_details);
+
+    // Then delete the turf time slots
+    $cleanup_sql = "DELETE FROM turf_time_slots WHERE date < CURRENT_DATE";
+    $conn->query($cleanup_sql);
+
+    $conn->commit();
+} catch (Exception $e) {
+    $conn->rollback();
+    // Log the error
+    error_log("Error during cleanup: " . $e->getMessage());
+}
 
 // Handle adding slot to turf_time_slots
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

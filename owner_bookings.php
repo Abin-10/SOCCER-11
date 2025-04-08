@@ -16,6 +16,22 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Get turf ID from URL parameter
+$selected_turf_id = isset($_GET['turf_id']) ? intval($_GET['turf_id']) : null;
+
+// Fetch all turfs owned by the current owner
+$turfs_sql = "SELECT turf_id, name FROM turf WHERE owner_id = ?";
+$turfs_stmt = $conn->prepare($turfs_sql);
+$turfs_stmt->bind_param("i", $_SESSION['user_id']);
+$turfs_stmt->execute();
+$turfs_result = $turfs_stmt->get_result();
+
+// Build the WHERE clause for turf filtering
+$turf_where_clause = "AND tts.turf_id IN (SELECT turf_id FROM turf WHERE owner_id = ?)";
+if ($selected_turf_id) {
+    $turf_where_clause .= " AND tts.turf_id = ?";
+}
+
 // Fetch pending bookings
 $pending_sql = "SELECT 
     tts.id, 
@@ -28,16 +44,25 @@ $pending_sql = "SELECT
     fts.end_time, 
     tts.date, 
     tts.is_available, 
-    tts.is_owner_reserved 
+    tts.is_owner_reserved,
+    t.name as turf_name 
 FROM turf_time_slots tts
 JOIN fixed_time_slots fts ON tts.slot_id = fts.id
 LEFT JOIN users u ON tts.booked_by = u.id
+JOIN turf t ON tts.turf_id = t.turf_id
 WHERE tts.booking_status = 'pending'
+" . $turf_where_clause . "
 ORDER BY tts.date ASC, fts.start_time ASC";
 
-$pending_result = $conn->query($pending_sql);
+$pending_stmt = $conn->prepare($pending_sql);
+if ($selected_turf_id) {
+    $pending_stmt->bind_param("ii", $_SESSION['user_id'], $selected_turf_id);
+} else {
+    $pending_stmt->bind_param("i", $_SESSION['user_id']);
+}
+$pending_result = $pending_stmt->execute() ? $pending_stmt->get_result() : false;
 
-// Fetch all recent bookings
+// Fetch recent bookings with similar modification
 $recent_sql = "SELECT 
     tts.id, 
     tts.turf_id,
@@ -49,15 +74,41 @@ $recent_sql = "SELECT
     fts.end_time, 
     tts.date, 
     tts.is_available, 
-    tts.is_owner_reserved 
+    tts.is_owner_reserved,
+    t.name as turf_name 
 FROM turf_time_slots tts
 JOIN fixed_time_slots fts ON tts.slot_id = fts.id
 LEFT JOIN users u ON tts.booked_by = u.id
+JOIN turf t ON tts.turf_id = t.turf_id
 WHERE tts.booking_status IN ('confirmed', 'rejected', 'pending')
+" . $turf_where_clause . "
 ORDER BY tts.date DESC, fts.start_time DESC
 LIMIT 10";
 
-$recent_result = $conn->query($recent_sql);
+$recent_stmt = $conn->prepare($recent_sql);
+if ($selected_turf_id) {
+    $recent_stmt->bind_param("ii", $_SESSION['user_id'], $selected_turf_id);
+} else {
+    $recent_stmt->bind_param("i", $_SESSION['user_id']);
+}
+$recent_result = $recent_stmt->execute() ? $recent_stmt->get_result() : false;
+
+if (!$pending_result || !$recent_result) {
+    die("Error fetching bookings: " . $conn->error);
+}
+
+// Get selected turf name if turf_id is set
+$selected_turf_name = "All Turfs"; // Default value
+if ($selected_turf_id) {
+    $turf_name_sql = "SELECT name FROM turf WHERE turf_id = ? AND owner_id = ?";
+    $turf_name_stmt = $conn->prepare($turf_name_sql);
+    $turf_name_stmt->bind_param("ii", $selected_turf_id, $_SESSION['user_id']);
+    $turf_name_stmt->execute();
+    $turf_name_result = $turf_name_stmt->get_result();
+    if ($turf_row = $turf_name_result->fetch_assoc()) {
+        $selected_turf_name = $turf_row['name'];
+    }
+}
 
 ?>
 
@@ -697,6 +748,70 @@ $recent_result = $conn->query($recent_sql);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
         }
+
+        .turf-name {
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .turf-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .turf-selector select {
+            min-width: 200px;
+        }
+
+        .header {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .header > div:first-child {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .selected-turf {
+            color: var(--primary);
+            margin: 0;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .selected-turf strong {
+            color: #2E7D32;
+        }
+
+        @media (min-width: 768px) {
+            .header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .booking-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-reject {
+            background: var(--danger);
+            color: white;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -749,7 +864,9 @@ $recent_result = $conn->query($recent_sql);
 
         <div class="main-content">
             <div class="header">
-                <h1>Owner Dashboard</h1>
+                <div>
+                    <h1>Owner Dashboard</h1>
+                </div>
                 <div class="dropdown">
                     <button class="dropdown-btn">
                         <i class="fas fa-user-circle"></i>
@@ -769,23 +886,20 @@ $recent_result = $conn->query($recent_sql);
                 </div>
             </div>
 
+            <!-- Add this after the header section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3><i class="fas fa-calendar-check mr-2"></i>Booking Management</h3>
+                <button id="downloadBookings" class="btn btn-success">
+                    <i class="fas fa-download mr-2"></i>Download All Bookings
+                </button>
+            </div>
+
             <!-- Stats Row -->
             <div class="stats-row fade-in">
                 <div class="stat-card">
                     <h3><i class="fas fa-clock mr-2"></i>Pending Bookings</h3>
                     <div class="stat-value"><?php echo $pending_result->num_rows; ?></div>
                 </div>
-                <div class="stat-card">
-                    <h3><i class="fas fa-calendar-check mr-2"></i>Total Bookings</h3>
-                    <div class="stat-value"><?php echo $recent_result->num_rows; ?></div>
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3><i class="fas fa-calendar-check mr-2"></i>Booking Management</h3>
-                <button id="downloadBookings" class="btn btn-success">
-                    <i class="fas fa-download mr-2"></i>Download All Bookings
-                </button>
             </div>
 
             <!-- Table Container -->
@@ -808,6 +922,7 @@ $recent_result = $conn->query($recent_sql);
                             <tr>
                                 <td>
                                     <div class="booking-details">
+                                        <div class="turf-name"><i class="fas fa-futbol mr-2"></i><?php echo htmlspecialchars($booking['turf_name']); ?></div>
                                         <div class="date"><i class="far fa-calendar-alt mr-2"></i><?php echo date('d M Y', strtotime($booking['date'])); ?></div>
                                         <div class="time text-muted">
                                             <i class="far fa-clock mr-2"></i>
@@ -834,16 +949,18 @@ $recent_result = $conn->query($recent_sql);
                                     </span>
                                 </td>
                                 <td>
-                                    <button class="btn btn-confirm confirm-booking mr-2" 
-                                            data-booking-id="<?php echo $booking['id']; ?>" 
-                                            data-action="confirm">
-                                        <i class="fas fa-check"></i>Confirm
-                                    </button>
-                                    <button class="btn btn-reject reject-booking" 
-                                            data-booking-id="<?php echo $booking['id']; ?>" 
-                                            data-action="reject">
-                                        <i class="fas fa-times"></i>Reject
-                                    </button>
+                                    <div class="booking-actions">
+                                        <button class="btn btn-confirm confirm-booking" 
+                                                data-booking-id="<?php echo $booking['id']; ?>" 
+                                                data-action="confirm">
+                                            <i class="fas fa-check"></i>Confirm
+                                        </button>
+                                        <button class="btn btn-reject reject-booking" 
+                                                data-booking-id="<?php echo $booking['id']; ?>" 
+                                                data-action="reject">
+                                            <i class="fas fa-times"></i>Reject
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
@@ -892,6 +1009,7 @@ $recent_result = $conn->query($recent_sql);
                                 <tr>
                                     <td>
                                         <div class="booking-details">
+                                            <div class="turf-name"><i class="fas fa-futbol mr-2"></i><?php echo htmlspecialchars($booking['turf_name']); ?></div>
                                             <div class="date">
                                                 <i class="far fa-calendar-alt mr-2"></i>
                                                 <?php echo date('d M Y', strtotime($booking['date'])); ?>
@@ -1012,8 +1130,13 @@ $recent_result = $conn->query($recent_sql);
         document.querySelectorAll('.confirm-booking, .reject-booking').forEach(button => {
             button.addEventListener('click', function() {
                 const row = this.closest('tr');
-                if (confirm('Are you sure you want to ' + this.dataset.action + ' this booking?')) {
-                    handleBookingAction(this.dataset.bookingId, this.dataset.action, row);
+                const action = this.dataset.action;
+                const confirmMessage = action === 'confirm' 
+                    ? 'Are you sure you want to confirm this booking?' 
+                    : 'Are you sure you want to reject this booking?';
+                
+                if (confirm(confirmMessage)) {
+                    handleBookingAction(this.dataset.bookingId, action, row);
                 }
             });
         });

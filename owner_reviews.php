@@ -17,17 +17,38 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch reviews with user information
+// Fetch turf details for the owner
+$turf_query = "SELECT turf_id, name FROM turf WHERE owner_id = ?";
+$stmt = $conn->prepare($turf_query);
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$turf_result = $stmt->get_result();
+
+// Get selected turf_id from URL parameter or default to first turf
+$selected_turf_id = isset($_GET['turf_id']) ? intval($_GET['turf_id']) : null;
+if (!$selected_turf_id && $turf_result->num_rows > 0) {
+    $first_turf = $turf_result->fetch_assoc();
+    $selected_turf_id = $first_turf['turf_id'];
+    $turf_result->data_seek(0); // Reset result pointer
+}
+
+// Fetch reviews with user information for selected turf
 $reviews_query = "SELECT r.*, u.name as username 
                  FROM reviews r 
                  JOIN users u ON r.user_id = u.id 
+                 WHERE r.turf_id = ?
                  ORDER BY r.review_date DESC";
-$reviews_result = $conn->query($reviews_query);
+$stmt = $conn->prepare($reviews_query);
+$stmt->bind_param("i", $selected_turf_id);
+$stmt->execute();
+$reviews_result = $stmt->get_result();
 
-// Calculate average rating
-$avg_rating_query = "SELECT AVG(rating) as avg_rating FROM reviews";
-$avg_rating_result = $conn->query($avg_rating_query);
-$avg_rating = number_format($avg_rating_result->fetch_assoc()['avg_rating'], 1);
+// Calculate average rating for selected turf
+$avg_rating_query = "SELECT AVG(rating) as avg_rating FROM reviews WHERE turf_id = ?";
+$stmt = $conn->prepare($avg_rating_query);
+$stmt->bind_param("i", $selected_turf_id);
+$stmt->execute();
+$avg_rating = number_format($stmt->get_result()->fetch_assoc()['avg_rating'], 1);
 
 ?>
 
@@ -558,6 +579,34 @@ $avg_rating = number_format($avg_rating_result->fetch_assoc()['avg_rating'], 1);
                 margin-left: 90px;
             }
         }
+
+        .turf-selector {
+            margin-bottom: 30px;
+        }
+
+        .turf-selector select {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(76,175,80,0.2);
+            background: white;
+            font-size: 1rem;
+            color: #2E7D32;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .turf-selector select:hover {
+            border-color: #4CAF50;
+            box-shadow: 0 6px 20px rgba(76,175,80,0.15);
+        }
+
+        .turf-selector select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 6px 20px rgba(76,175,80,0.15);
+        }
     </style>
 </head>
 <body>
@@ -632,6 +681,19 @@ $avg_rating = number_format($avg_rating_result->fetch_assoc()['avg_rating'], 1);
             </div>
 
             <div class="reviews-container">
+                <div class="turf-selector">
+                    <form method="GET" action="">
+                        <select name="turf_id" onchange="this.form.submit()">
+                            <?php while ($turf = $turf_result->fetch_assoc()): ?>
+                                <option value="<?php echo $turf['turf_id']; ?>" 
+                                        <?php echo ($selected_turf_id == $turf['turf_id']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($turf['name']); ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
+                    </form>
+                </div>
+
                 <div class="rating-summary">
                     <h2>Overall Rating</h2>
                     <div class="average-rating"><?php echo $avg_rating; ?> / 5.0</div>

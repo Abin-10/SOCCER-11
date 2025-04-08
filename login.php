@@ -31,6 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['form_type']) && $_POST
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_role'] = $user['role'];
+            $_SESSION['email'] = $user['email'];
             
             switch($user['role']) {
                 case 'admin':
@@ -594,8 +595,8 @@ $conn->close();
           message: 'Name must be 2-50 characters and contain only letters, spaces, and hyphens'
         },
         email: {
-          pattern: /^[a-zA-Z0-9._%+-]+@gmail\.com$/,
-          message: 'Please enter a valid Gmail address (must end with @gmail.com)'
+          pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+          message: 'Please enter a valid email address'
         },
         phone: {
           pattern: /^[6-9]\d{9}$/,

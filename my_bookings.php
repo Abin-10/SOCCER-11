@@ -20,7 +20,11 @@ $sql = "SELECT
             tts.id,
             t.name as turf_name,
             t.location,
-            t.hourly_rate,
+            CASE 
+                WHEN HOUR(fts.start_time) BETWEEN 6 AND 10 THEN t.morning_rate
+                WHEN HOUR(fts.start_time) BETWEEN 11 AND 16 THEN t.afternoon_rate
+                ELSE t.evening_rate
+            END as hourly_rate,
             fts.start_time,
             fts.end_time,
             tts.date,
@@ -78,6 +82,7 @@ $result = $stmt->get_result();
                     <th>Amount</th>
                     <th>Booked On</th>
                     <th>Invoice</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -118,6 +123,14 @@ $result = $stmt->get_result();
                                         data-amount="<?php echo $booking['hourly_rate']; ?>"
                                         data-user-name="<?php echo htmlspecialchars($_SESSION['user_name']); ?>">
                                     <i class="fas fa-download"></i> Invoice
+                                </button>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if ($booking['booking_status'] === 'pending'): ?>
+                                <button class="btn btn-sm btn-danger cancel-booking" 
+                                        data-booking-id="<?php echo $booking['id']; ?>">
+                                    <i class="fas fa-times"></i> Cancel
                                 </button>
                             <?php endif; ?>
                         </td>

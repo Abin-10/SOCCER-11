@@ -89,6 +89,26 @@ try {
     $update_stmt->bind_param("i", $slot_id);
     $update_stmt->execute();
 
+    // Insert payment record
+    $payment_sql = "INSERT INTO payments (
+        turf_time_slot_id,
+        amount,
+        payment_date,
+        payment_status
+    ) VALUES (?, ?, NOW(), ?)";
+
+    $payment_stmt = $conn->prepare($payment_sql);
+    $payment_stmt->bind_param(
+        "ids",
+        $booking_id,
+        $_POST['payment_amount'],
+        $_POST['payment_status']
+    );
+
+    if (!$payment_stmt->execute()) {
+        throw new Exception('Failed to record payment');
+    }
+
     // Commit transaction
     $conn->commit();
 
@@ -115,14 +135,27 @@ try {
     if (isset($detail_stmt)) $detail_stmt->close();
     if (isset($notify_stmt)) $notify_stmt->close();
     if (isset($update_stmt)) $update_stmt->close();
+    if (isset($payment_stmt)) $payment_stmt->close();
     
     // Close the connection last, after all operations are complete
     if (isset($conn)) $conn->close();
 }
 
 function calculateBookingAmount($conn, $turf_id, $slot_id) {
-    // Get turf hourly rate
-    $rate_sql = "SELECT hourly_rate FROM turf WHERE turf_id = ?";
+    // Get slot timing to determine which rate to use
+    $slot_sql = "SELECT start_time FROM fixed_time_slots WHERE id = ?";
+    $slot_stmt = $conn->prepare($slot_sql);
+    $slot_stmt->bind_param("i", $slot_id);
+    $slot_stmt->execute();
+    $slot_result = $slot_stmt->get_result();
+    $slot_data = $slot_result->fetch_assoc();
+    $slot_stmt->close();
+
+    // Get hour from slot start time
+    $slotHour = (int)date('H', strtotime($slot_data['start_time']));
+
+    // Get turf rates
+    $rate_sql = "SELECT morning_rate, afternoon_rate, evening_rate FROM turf WHERE turf_id = ?";
     $rate_stmt = $conn->prepare($rate_sql);
     $rate_stmt->bind_param("i", $turf_id);
     $rate_stmt->execute();
@@ -130,6 +163,15 @@ function calculateBookingAmount($conn, $turf_id, $slot_id) {
     $rate_data = $rate_result->fetch_assoc();
     $rate_stmt->close();
     
-    return $rate_data['hourly_rate'];
+    // Determine rate based on slot time
+    if ($slotHour >= 6 && $slotHour <= 10) {
+        return floatval($rate_data['morning_rate']);
+    } else if ($slotHour > 10 && $slotHour <= 16) {
+        return floatval($rate_data['afternoon_rate']);
+    } else if ($slotHour > 16 && $slotHour <= 23) {
+        return floatval($rate_data['evening_rate']);
+    } else {
+        return floatval($rate_data['morning_rate']); // Default to morning rate
+    }
 }
 ?>

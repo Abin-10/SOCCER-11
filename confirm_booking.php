@@ -92,12 +92,14 @@ try {
         throw new Exception('Failed to create notification');
     }
 
-    // Send confirmation email
-    $email_sent = sendBookingConfirmationEmail(
-        $booking_data['user_email'],
-        $booking_data['user_name'],
-        $booking_data
-    );
+    // Send confirmation email only when confirming the booking
+    if ($data['action'] === 'confirm') {
+        $email_sent = sendBookingConfirmationEmail(
+            $booking_data['user_email'],
+            $booking_data['user_name'],
+            $booking_data
+        );
+    }
 
     // Commit the transaction
     $conn->commit();
@@ -107,15 +109,22 @@ try {
     
     // Send success response
     header('Content-Type: application/json');
-    if ($email_sent) {
-        echo json_encode([
-            'success' => true,
-            'message' => 'Booking has been ' . $action_text . ' successfully and confirmation email sent to customer'
-        ]);
+    if ($data['action'] === 'confirm') {
+        if ($email_sent) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Booking has been confirmed successfully and confirmation email sent to customer'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Booking has been confirmed successfully but failed to send email notification'
+            ]);
+        }
     } else {
         echo json_encode([
             'success' => true,
-            'message' => 'Booking has been ' . $action_text . ' successfully but failed to send email notification'
+            'message' => 'Booking has been rejected successfully'
         ]);
     }
     exit();

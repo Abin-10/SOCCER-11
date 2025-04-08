@@ -172,6 +172,15 @@ $result = $conn->query("SELECT id, name, email, phone, role, status FROM users")
             height: 45px; /* Increase height */
             font-size: 16px; /* Increase font size */
         }
+        
+        .badge-secondary {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -244,21 +253,31 @@ $result = $conn->query("SELECT id, name, email, phone, role, status FROM users")
                                 <td><?= htmlspecialchars($row['phone']) ?></td>
                                 <td><?= ucfirst($row['role']) ?></td>
                                 <td>
-                                    <button class="btn btn-sm status-toggle <?= $row['status'] === 'active' ? 'btn-success' : 'btn-danger' ?>" 
-                                            data-user-id="<?= $row['id'] ?>" 
-                                            data-status="<?= $row['status'] ?>">
-                                        <?= ucfirst($row['status']) ?>
-                                    </button>
+                                    <?php if ($row['role'] !== 'admin'): ?>
+                                        <button class="btn btn-sm status-toggle <?= $row['status'] === 'active' ? 'btn-success' : 'btn-danger' ?>" 
+                                                data-user-id="<?= $row['id'] ?>" 
+                                                data-status="<?= $row['status'] ?>">
+                                            <?= ucfirst($row['status']) ?>
+                                        </button>
+                                    <?php else: ?>
+                                        <span class="badge badge-secondary">Admin</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary edit-user" 
-                                            data-user-id="<?= $row['id'] ?>"
-                                            data-name="<?= htmlspecialchars($row['name']) ?>"
-                                            data-email="<?= htmlspecialchars($row['email']) ?>"
-                                            data-phone="<?= htmlspecialchars($row['phone']) ?>"
-                                            data-role="<?= $row['role'] ?>">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
+                                    <?php if ($row['role'] !== 'admin'): ?>
+                                        <button class="btn btn-sm btn-primary edit-user" 
+                                                data-user-id="<?= $row['id'] ?>"
+                                                data-name="<?= htmlspecialchars($row['name']) ?>"
+                                                data-email="<?= htmlspecialchars($row['email']) ?>"
+                                                data-phone="<?= htmlspecialchars($row['phone']) ?>"
+                                                data-role="<?= $row['role'] ?>">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    <?php else: ?>
+                                        <button class="btn btn-sm btn-secondary" disabled>
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endwhile; ?>

@@ -40,13 +40,8 @@ function validatePhoneNumber($phone) {
 
 // Function to validate email
 function validateEmail($email) {
-    // Check if the email is valid and does not end with certain invalid domains
-    return filter_var($email, FILTER_VALIDATE_EMAIL) && 
-           preg_match('/@gmail\.com$/i', $email) && // Ensure it ends with the correct domain
-           !preg_match('/@gmail1\.com$/i', $email) && // Check for wrong domain
-           !preg_match('/@gmaial\.com$/i', $email) && // Check for misspelling
-           !preg_match('/@gmail\.co$/i', $email) && // Check for incomplete domain
-           !preg_match('/@gmail\.comm$/i', $email); // Check for extra "m"
+    // Basic email validation using PHP's built-in filter
+    return filter_var($email, FILTER_VALIDATE_EMAIL);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
